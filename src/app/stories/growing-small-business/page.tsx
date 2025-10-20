@@ -24,6 +24,16 @@ export default function StorySmallBusinessPage() {
         improve cash flow, and focus on customers.
       </p>
 
+      {/* Hero Image */}
+      <div className="mt-8 aspect-video w-full rounded-lg border bg-muted overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/sofia.jpg"
+          alt="Sofia Park"
+          className="w-full h-full object-cover"
+        />
+      </div>
+
       <div className="mt-8 space-y-6 text-sm leading-7 text-muted-foreground">
         <p>
           When Sofia Park launched Park & Co., a neighborhood design studio, she

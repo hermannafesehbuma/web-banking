@@ -508,18 +508,25 @@ export default function Home() {
                 title: 'Growing a small business',
                 desc: 'How a local shop scaled with Fortiz business banking.',
                 author: 'Sofia Park • Park & Co.',
-                img: '',
+                img: '/sofia.jpg',
               },
               {
                 title: 'Saving for a first home',
                 desc: 'Automated savings helped reach a big milestone sooner.',
                 author: 'Anthony Rivera',
-                img: '',
+                img: '/rivera.jpg',
               },
             ].map((c) => (
               <Card key={c.title}>
                 <CardContent className="p-6">
-                  <div className="aspect-video w-full rounded-md border bg-muted" />
+                  <div className="aspect-video w-full rounded-md border bg-muted overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={c.img}
+                      alt={c.author}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                   <div className="mt-4">
                     <div className="font-medium">{c.title}</div>
                     <div className="text-sm text-muted-foreground mt-1">

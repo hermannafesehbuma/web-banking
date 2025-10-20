@@ -25,6 +25,16 @@ export default function StoryFirstHomePage() {
         a down payment faster than expected.
       </p>
 
+      {/* Hero Image */}
+      <div className="mt-8 aspect-video w-full rounded-lg border bg-muted overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/rivera.jpg"
+          alt="Anthony Rivera"
+          className="w-full h-full object-cover"
+        />
+      </div>
+
       <div className="mt-8 space-y-6 text-sm leading-7 text-muted-foreground">
         <p>
           Anthony always considered homeownership out of reach. After switching

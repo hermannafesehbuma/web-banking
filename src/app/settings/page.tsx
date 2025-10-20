@@ -123,21 +123,7 @@ export default function SettingsPage() {
     setSaving(true);
 
     try {
-      // Update phone_number and address in bank_users (for consistency)
-      const { error: bankUserError } = await supabase
-        .from('bank_users')
-        .update({
-          phone_number: phone.trim() || null,
-          address: address.trim() || null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', userId);
-
-      if (bankUserError) {
-        console.error('Bank user update error:', bankUserError);
-      }
-
-      // Also update in kyc_submissions (the source of truth for phone/address)
+      // Update phone_number and address in kyc_submissions (source of truth)
       const { error: kycError } = await supabase
         .from('kyc_submissions')
         .update({
@@ -150,10 +136,13 @@ export default function SettingsPage() {
 
       if (kycError) {
         console.error('KYC update error:', kycError);
-      }
-
-      // Show success if at least one update worked
-      if (!bankUserError || !kycError) {
+        toast({
+          title: 'Update failed',
+          description:
+            kycError.message || 'Could not save changes. Please try again.',
+          variant: 'destructive',
+        });
+      } else {
         toast({
           title: 'Profile updated',
           description: 'Your profile information has been saved successfully.',
@@ -163,15 +152,9 @@ export default function SettingsPage() {
         await supabase.from('audit_log').insert({
           user_id: userId,
           action: 'update_profile',
-          entity_type: 'bank_users',
+          entity_type: 'kyc_submissions',
           entity_id: userId,
           new_values: { phone_number: phone, address },
-        });
-      } else {
-        toast({
-          title: 'Update failed',
-          description: 'Could not save changes. Please try again.',
-          variant: 'destructive',
         });
       }
     } catch (err) {
