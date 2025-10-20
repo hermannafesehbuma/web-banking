@@ -26,6 +26,7 @@ import {
   Settings as SettingsIcon,
 } from 'lucide-react';
 import { DashboardNav } from '@/components/dashboard-nav';
+import { useToast } from '@/components/ui/simple-toast';
 import {
   PieChart,
   Pie,
@@ -94,6 +95,7 @@ type Statement = {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,10 +109,104 @@ export default function DashboardPage() {
   const [savingsGoal, setSavingsGoal] = useState<SavingsGoal | null>(null);
   const [statements, setStatements] = useState<Statement[]>([]);
 
+  // Transfer form state
+  const [fromAccountId, setFromAccountId] = useState('');
+  const [toAccountId, setToAccountId] = useState('');
+  const [transferAmount, setTransferAmount] = useState('');
+  const [transferNote, setTransferNote] = useState('');
+  const [transferring, setTransferring] = useState(false);
+
   useEffect(() => {
     loadDashboardData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleTransfer = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!fromAccountId || !toAccountId || !transferAmount) {
+      toast({
+        title: 'Validation error',
+        description: 'Please fill in all required fields.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const amount = parseFloat(transferAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast({
+        title: 'Invalid amount',
+        description: 'Please enter a valid amount greater than 0.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setTransferring(true);
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+
+      if (!accessToken) {
+        toast({
+          title: 'Error',
+          description: 'Please log in again.',
+          variant: 'destructive',
+        });
+        setTransferring(false);
+        return;
+      }
+
+      const response = await fetch('/api/transfers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          from_account_id: fromAccountId,
+          to_account_id: toAccountId,
+          amount,
+          description: transferNote,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast({
+          title: 'Transfer failed',
+          description: data.error || 'Could not complete transfer.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Transfer successful',
+          description: `$${amount.toFixed(2)} transferred successfully.`,
+        });
+
+        // Reset form
+        setTransferAmount('');
+        setTransferNote('');
+
+        // Reload dashboard data
+        await loadDashboardData();
+      }
+    } catch (err) {
+      console.error('Transfer error:', err);
+      toast({
+        title: 'Error',
+        description: 'Something went wrong. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setTransferring(false);
+    }
+  };
 
   const loadDashboardData = async () => {
     const {
@@ -373,14 +469,10 @@ export default function DashboardPage() {
 
         {/* Quick Actions */}
         <section className="mb-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <Button variant="outline" className="h-auto py-4 flex-col gap-2">
               <Send className="h-5 w-5" />
               <span className="text-sm">Transfer</span>
-            </Button>
-            <Button variant="outline" className="h-auto py-4 flex-col gap-2">
-              <Download className="h-5 w-5" />
-              <span className="text-sm">Deposit</span>
             </Button>
             <Button variant="outline" className="h-auto py-4 flex-col gap-2">
               <ArrowUpRight className="h-5 w-5" />
@@ -561,14 +653,17 @@ export default function DashboardPage() {
                 <CardDescription>Send money to another account</CardDescription>
               </CardHeader>
               <CardContent className="pt-0">
-                <form className="space-y-4">
+                <form onSubmit={handleTransfer} className="space-y-4">
                   <div className="grid gap-2">
                     <Label htmlFor="fromAccount">From</Label>
                     <select
                       id="fromAccount"
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                      defaultValue={accounts[0]?.id}
+                      value={fromAccountId}
+                      onChange={(e) => setFromAccountId(e.target.value)}
+                      required
                     >
+                      <option value="">Select account</option>
                       {accounts.map((acc) => (
                         <option key={acc.id} value={acc.id}>
                           {acc.account_type.charAt(0).toUpperCase() +
@@ -581,11 +676,26 @@ export default function DashboardPage() {
                     </select>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="recipient">To (Account or Email)</Label>
-                    <Input
-                      id="recipient"
-                      placeholder="Account number or email"
-                    />
+                    <Label htmlFor="toAccount">To</Label>
+                    <select
+                      id="toAccount"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      value={toAccountId}
+                      onChange={(e) => setToAccountId(e.target.value)}
+                      required
+                    >
+                      <option value="">Select account</option>
+                      {accounts
+                        .filter((acc) => acc.id !== fromAccountId)
+                        .map((acc) => (
+                          <option key={acc.id} value={acc.id}>
+                            {acc.account_type.charAt(0).toUpperCase() +
+                              acc.account_type.slice(1)}{' '}
+                            ****
+                            {acc.account_number.slice(-4)}
+                          </option>
+                        ))}
+                    </select>
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="amount">Amount</Label>
@@ -594,15 +704,27 @@ export default function DashboardPage() {
                       type="number"
                       step="0.01"
                       placeholder="0.00"
+                      value={transferAmount}
+                      onChange={(e) => setTransferAmount(e.target.value)}
+                      required
                     />
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="note">Note (optional)</Label>
-                    <Input id="note" placeholder="What's this for?" />
+                    <Input
+                      id="note"
+                      placeholder="What's this for?"
+                      value={transferNote}
+                      onChange={(e) => setTransferNote(e.target.value)}
+                    />
                   </div>
-                  <Button type="button" className="w-full">
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={transferring}
+                  >
                     <Send className="mr-2 h-4 w-4" />
-                    Send Money
+                    {transferring ? 'Processing...' : 'Transfer Money'}
                   </Button>
                 </form>
               </CardContent>

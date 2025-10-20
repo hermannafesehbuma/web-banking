@@ -7,10 +7,10 @@
 CREATE TABLE IF NOT EXISTS cards (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES bank_users(id) ON DELETE CASCADE,
-  card_number text NOT NULL UNIQUE,
+  card_number text UNIQUE,
   card_type text NOT NULL CHECK (card_type IN ('debit', 'credit', 'prepaid')),
-  expiry_date text NOT NULL,
-  cvv text NOT NULL,
+  expiry_date text,
+  cvv text,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
@@ -41,7 +41,7 @@ USING (auth.uid() = user_id);
 -- ================================================
 
 -- Generate random card number (Luhn algorithm compliant)
-CREATE OR REPLACE FUNCTION public.generate_card_number()
+CREATE OR REPLACE FUNCTION generate_card_number()
 RETURNS text AS $$
 DECLARE
   num text;
@@ -53,7 +53,7 @@ END;
 $$ LANGUAGE plpgsql VOLATILE;
 
 -- Generate expiry date (3 years from now)
-CREATE OR REPLACE FUNCTION public.generate_expiry_date()
+CREATE OR REPLACE FUNCTION generate_expiry_date()
 RETURNS text AS $$
 DECLARE
   expiry_month text;
@@ -66,7 +66,7 @@ END;
 $$ LANGUAGE plpgsql VOLATILE;
 
 -- Generate random CVV (3 digits)
-CREATE OR REPLACE FUNCTION public.generate_cvv()
+CREATE OR REPLACE FUNCTION generate_cvv()
 RETURNS text AS $$
 BEGIN
   RETURN lpad((floor(random()*1000))::int::text, 3, '0');
@@ -77,38 +77,30 @@ $$ LANGUAGE plpgsql VOLATILE;
 -- TRIGGER: Auto-generate card details and create alert
 -- ================================================
 
-CREATE OR REPLACE FUNCTION public.create_card_details()
+CREATE OR REPLACE FUNCTION create_card_details()
 RETURNS trigger AS $$
 BEGIN
-  -- Generate card details if not provided
-  IF NEW.card_number IS NULL THEN
-    NEW.card_number := public.generate_card_number();
-  END IF;
-  
-  IF NEW.expiry_date IS NULL THEN
-    NEW.expiry_date := public.generate_expiry_date();
-  END IF;
-  
-  IF NEW.cvv IS NULL THEN
-    NEW.cvv := public.generate_cvv();
-  END IF;
+  -- Always generate card details
+  NEW.card_number := generate_card_number();
+  NEW.expiry_date := generate_expiry_date();
+  NEW.cvv := generate_cvv();
   
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS trg_generate_card_details ON public.cards;
+DROP TRIGGER IF EXISTS trg_generate_card_details ON cards;
 CREATE TRIGGER trg_generate_card_details
-BEFORE INSERT ON public.cards
+BEFORE INSERT ON cards
 FOR EACH ROW
-EXECUTE PROCEDURE public.create_card_details();
+EXECUTE PROCEDURE create_card_details();
 
 -- Trigger to create alert after card creation
-CREATE OR REPLACE FUNCTION public.create_card_alert()
+CREATE OR REPLACE FUNCTION create_card_alert()
 RETURNS trigger AS $$
 BEGIN
   -- Create alert notification
-  INSERT INTO public.alerts (user_id, type, title, message, severity)
+  INSERT INTO alerts (user_id, type, title, message, severity)
   VALUES (
     NEW.user_id,
     'general',
@@ -121,11 +113,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-DROP TRIGGER IF EXISTS trg_create_card_alert ON public.cards;
+DROP TRIGGER IF EXISTS trg_create_card_alert ON cards;
 CREATE TRIGGER trg_create_card_alert
-AFTER INSERT ON public.cards
+AFTER INSERT ON cards
 FOR EACH ROW
-EXECUTE PROCEDURE public.create_card_alert();
+EXECUTE PROCEDURE create_card_alert();
 
 -- ================================================
 -- VERIFICATION

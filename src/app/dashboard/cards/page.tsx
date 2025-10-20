@@ -161,6 +161,7 @@ export default function CardsPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('Card creation error:', errorData);
         toast({
           title: 'Request failed',
           description:
@@ -378,11 +379,11 @@ export default function CardsPage() {
                   <div className="w-full bg-muted rounded-full h-2">
                     <div
                       className="bg-primary h-2 rounded-full"
-                      style={{ width: '35%' }}
+                      style={{ width: '0%' }}
                     />
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    $1,750 spent today
+                    $0.00 spent today
                   </p>
                 </div>
               </div>
@@ -395,23 +396,9 @@ export default function CardsPage() {
               <CardDescription>Latest card transactions</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3 text-sm">
-                <div>
-                  <p className="font-medium">Amazon.com</p>
-                  <p className="text-xs text-muted-foreground">
-                    Today, 2:45 PM
-                  </p>
-                  <p className="font-medium mt-1">-$89.99</p>
-                </div>
-                <Separator />
-                <div>
-                  <p className="font-medium">Starbucks</p>
-                  <p className="text-xs text-muted-foreground">
-                    Today, 8:30 AM
-                  </p>
-                  <p className="font-medium mt-1">-$5.75</p>
-                </div>
-              </div>
+              <p className="text-sm text-muted-foreground py-4">
+                No card transactions yet. Start using your card!
+              </p>
             </CardContent>
           </Card>
         </div>
