@@ -24,8 +24,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
 
-      // Sync to localStorage
-      if (currentUser) {
+      // Sync to localStorage and cookie
+      if (currentUser && session) {
         localStorage.setItem(
           'fortiz_user_session',
           JSON.stringify({
@@ -34,9 +34,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             timestamp: Date.now(),
           })
         );
+        // Set cookie for middleware
+        document.cookie = `fortiz-session=${JSON.stringify({
+          userId: currentUser.id,
+          accessToken: session.access_token,
+        })};path=/;max-age=3600;SameSite=Lax`;
       } else {
         localStorage.removeItem('fortiz_user_session');
         localStorage.removeItem('fortiz_user');
+        // Clear cookie
+        document.cookie = 'fortiz-session=;path=/;max-age=0';
       }
 
       setLoading(false);
@@ -49,8 +56,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
 
-      // Sync to localStorage on auth change
-      if (currentUser) {
+      // Sync to localStorage and cookie on auth change
+      if (currentUser && session) {
         localStorage.setItem(
           'fortiz_user_session',
           JSON.stringify({
@@ -59,9 +66,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             timestamp: Date.now(),
           })
         );
+        // Set cookie for middleware
+        document.cookie = `fortiz-session=${JSON.stringify({
+          userId: currentUser.id,
+          accessToken: session.access_token,
+        })};path=/;max-age=3600;SameSite=Lax`;
       } else {
         localStorage.removeItem('fortiz_user_session');
         localStorage.removeItem('fortiz_user');
+        // Clear cookie
+        document.cookie = 'fortiz-session=;path=/;max-age=0';
       }
     });
 

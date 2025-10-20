@@ -17,7 +17,8 @@ type KycStatus = {
   status: string;
   submitted_at: string;
   reviewed_at: string | null;
-  document_type: string;
+  identification_type: string;
+  identification_number: string;
 };
 
 export default function KycStatusPage() {
@@ -28,6 +29,7 @@ export default function KycStatusPage() {
 
   useEffect(() => {
     loadStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadStatus = async () => {
@@ -51,13 +53,15 @@ export default function KycStatusPage() {
     // Get latest KYC submission
     const { data: kyc } = await supabase
       .from('kyc_submissions')
-      .select('status, submitted_at, reviewed_at, document_type')
+      .select(
+        'status, submitted_at, reviewed_at, identification_type, identification_number'
+      )
       .eq('user_id', user.id)
       .order('submitted_at', { ascending: false })
       .limit(1)
       .single();
 
-    setKycStatus(kyc as any);
+    setKycStatus(kyc as KycStatus | null);
     setLoading(false);
   };
 
@@ -74,7 +78,9 @@ export default function KycStatusPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base">No submission found</CardTitle>
-              <CardDescription>You haven't submitted KYC yet</CardDescription>
+              <CardDescription>
+                You haven&apos;t submitted KYC yet
+              </CardDescription>
             </CardHeader>
             <CardContent className="pt-0">
               <Button asChild>
@@ -97,9 +103,10 @@ export default function KycStatusPage() {
             </CardHeader>
             <CardContent className="pt-0 text-sm text-muted-foreground">
               <p>
-                We're reviewing your {kycStatus.document_type} document. This
-                typically takes 1–2 business days. You'll receive an email when
-                your verification is complete.
+                We&apos;re reviewing your{' '}
+                {kycStatus.identification_type.toUpperCase()} verification. This
+                typically takes 1–2 business days. You&apos;ll receive an email
+                when your verification is complete.
               </p>
             </CardContent>
           </Card>
@@ -138,8 +145,9 @@ export default function KycStatusPage() {
             </CardHeader>
             <CardContent className="pt-0 text-sm text-muted-foreground space-y-4">
               <p>
-                We couldn't verify your identity with the documents provided.
-                Common reasons: blurry photo, expired ID, unreadable text.
+                We couldn&apos;t verify your identity with the documents
+                provided. Common reasons: blurry photo, expired ID, unreadable
+                text.
               </p>
               <p>Please upload clear, current documents and resubmit.</p>
               <Button asChild>

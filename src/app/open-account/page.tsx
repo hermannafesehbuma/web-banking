@@ -42,7 +42,17 @@ export default function OpenAccountPage() {
       });
       if (signErr) throw signErr;
       const user = data.user;
+      const session = data.session;
+
       if (!user) throw new Error('Sign up failed');
+
+      // Store session in cookie for middleware
+      if (session) {
+        document.cookie = `fortiz-session=${JSON.stringify({
+          userId: user.id,
+          accessToken: session.access_token,
+        })};path=/;max-age=3600;SameSite=Lax`;
+      }
 
       const { error: insertErr } = await supabase.from('bank_users').insert({
         id: user.id,
@@ -53,8 +63,8 @@ export default function OpenAccountPage() {
       if (insertErr) throw insertErr;
 
       router.push('/auth/verify-pending');
-    } catch (err: any) {
-      setError(err.message ?? 'Something went wrong');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -80,7 +90,8 @@ export default function OpenAccountPage() {
           <CardHeader>
             <CardTitle className="text-base">Sign up</CardTitle>
             <CardDescription>
-              We'll verify your email before proceeding to identity verification
+              We&apos;ll verify your email before proceeding to identity
+              verification
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-0">

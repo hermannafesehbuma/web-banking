@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/SupbaseClient';
 import {
   Card,
@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,33 +27,54 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
+
     try {
+      // Sign in with Supabase
       const { data, error: signErr } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
+
       if (signErr) throw signErr;
 
       const user = data.user;
-      if (!user) throw new Error('Login failed');
+      const session = data.session;
 
-      // Check email verification
+      if (!user || !session)
+        throw new Error('Login failed. Please check credentials.');
+
+      // Store session in cookie for middleware to read
+      document.cookie = `fortiz-session=${JSON.stringify({
+        userId: user.id,
+        accessToken: session.access_token,
+      })};path=/;max-age=3600;SameSite=Lax`;
+
+      console.log('Login successful:', { user: user.id, session: !!session });
+
+      // Check if email is verified
       if (!user.email_confirmed_at) {
         router.push('/auth/verify-pending');
         return;
       }
 
-      // Check KYC status
-      const { data: bankUser } = await supabase
+      // Get redirect param if exists
+      const redirectTo = searchParams.get('redirect') || undefined;
+
+      // Fetch KYC status from bank_users
+      const { data: bankUser, error: bankError } = await supabase
         .from('bank_users')
         .select('kyc_status')
         .eq('id', user.id)
         .single();
 
-      const kycStatus = bankUser?.kyc_status ?? 'pending';
+      if (bankError) throw bankError;
 
-      // Route based on KYC status
-      if (kycStatus === 'pending') {
+      const kycStatus = (bankUser?.kyc_status || 'pending').toLowerCase();
+
+      // Redirect priority
+      if (redirectTo && kycStatus === 'approved') {
+        router.push(redirectTo);
+      } else if (kycStatus === 'pending') {
         router.push('/kyc');
       } else if (kycStatus === 'approved') {
         router.push('/dashboard');
@@ -61,7 +83,7 @@ export default function LoginPage() {
         router.push('/kyc/status');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invalid credentials');
+      setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
       setLoading(false);
     }

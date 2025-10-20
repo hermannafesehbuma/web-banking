@@ -12,8 +12,13 @@ create table if not exists public.bank_users (
 create table if not exists public.kyc_submissions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.bank_users(id) on delete cascade,
-  document_type text not null,
-  document_url text not null,
+  identification_type text not null check (identification_type in ('ssn','tin')),
+  identification_number text not null,
+  document_urls text[] not null,
+  selfie_url text not null,
+  address text not null,
+  phone_number text not null,
+  proof_of_address_url text not null,
   status text not null default 'pending',
   submitted_at timestamptz not null default now(),
   reviewed_at timestamptz

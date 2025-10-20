@@ -51,6 +51,9 @@ export function UserMenu() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     localStorage.removeItem('fortiz_user');
+    localStorage.removeItem('fortiz_user_session');
+    // Clear session cookie
+    document.cookie = 'fortiz-session=;path=/;max-age=0';
     router.push('/');
   };
 
