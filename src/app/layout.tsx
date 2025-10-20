@@ -1,11 +1,10 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import Link from 'next/link';
 import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { UserMenu } from '@/components/UserMenu';
 import { SimpleToastProvider } from '@/components/ui/simple-toast';
 import { ThemeProvider } from '@/components/theme-provider';
+import { MainHeader } from '@/components/main-header';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -37,33 +36,7 @@ export default function RootLayout({
           <AuthProvider>
             <SimpleToastProvider>
               <div className="min-h-dvh flex flex-col">
-                <header className="sticky top-0 z-40 border-b bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                  <div className="mx-auto w-full max-w-6xl px-6 py-4 flex items-center justify-between">
-                    <Link
-                      href="/"
-                      className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-                    >
-                      <div className="h-8 w-8 rounded-md bg-primary" />
-                      <span className="text-base font-semibold tracking-tight">
-                        Fortiz Bank
-                      </span>
-                    </Link>
-                    <div className="flex items-center gap-6">
-                      <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-                        <a href="/services" className="hover:text-foreground">
-                          Services
-                        </a>
-                        <a href="/about" className="hover:text-foreground">
-                          About
-                        </a>
-                        <a href="/contact" className="hover:text-foreground">
-                          Contact
-                        </a>
-                      </nav>
-                      <UserMenu />
-                    </div>
-                  </div>
-                </header>
+                <MainHeader />
                 <main className="flex-1">{children}</main>
                 <footer className="border-t" id="global-footer">
                   <div className="mx-auto w-full max-w-6xl px-6 py-12">

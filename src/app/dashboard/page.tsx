@@ -470,15 +470,27 @@ export default function DashboardPage() {
         {/* Quick Actions */}
         <section className="mb-8">
           <div className="grid grid-cols-3 gap-3">
-            <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+            <Button
+              variant="outline"
+              className="h-auto py-4 flex-col gap-2"
+              onClick={() => router.push('/dashboard/transfer')}
+            >
               <Send className="h-5 w-5" />
               <span className="text-sm">Transfer</span>
             </Button>
-            <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+            <Button
+              variant="outline"
+              className="h-auto py-4 flex-col gap-2"
+              onClick={() => router.push('/dashboard/send-money')}
+            >
               <ArrowUpRight className="h-5 w-5" />
               <span className="text-sm">Send Money</span>
             </Button>
-            <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+            <Button
+              variant="outline"
+              className="h-auto py-4 flex-col gap-2"
+              onClick={() => router.push('/dashboard/bills')}
+            >
               <DollarSign className="h-5 w-5" />
               <span className="text-sm">Pay Bills</span>
             </Button>
