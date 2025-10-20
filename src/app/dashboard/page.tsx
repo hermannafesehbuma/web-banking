@@ -294,7 +294,7 @@ export default function DashboardPage() {
         {/* 1. Account Overview */}
         <section className="mb-8">
           <h2 className="text-lg font-semibold mb-4">Account Overview</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Total Balance */}
             <Card>
               <CardHeader>
@@ -302,11 +302,25 @@ export default function DashboardPage() {
                 <CardDescription>Across all accounts</CardDescription>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="text-4xl font-semibold tracking-tight">
+                <div className="text-3xl font-semibold tracking-tight">
                   ${totalBalance.toFixed(2)}
                 </div>
+                <p className="text-xs text-muted-foreground mt-2">USD</p>
+              </CardContent>
+            </Card>
+
+            {/* Pending Balance */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Pending Balance</CardTitle>
+                <CardDescription>Refunds processing</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="text-3xl font-semibold tracking-tight text-amber-600">
+                  $0.00
+                </div>
                 <p className="text-xs text-muted-foreground mt-2">
-                  USD • Updated just now
+                  Will be available soon
                 </p>
               </CardContent>
             </Card>
