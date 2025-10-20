@@ -35,12 +35,10 @@ import { useToast } from '@/components/ui/simple-toast';
 
 type BankCard = {
   id: string;
-  card_number: string;
-  card_type: 'debit' | 'credit';
-  account_id: string;
-  status: 'active' | 'frozen' | 'cancelled';
-  expiry_date: string;
-  cvv: string;
+  card_number: string | null;
+  card_type: 'debit' | 'credit' | 'prepaid';
+  expiry_date: string | null;
+  cvv: string | null;
 };
 
 export default function CardsPage() {
@@ -93,7 +91,7 @@ export default function CardsPage() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Cards fetched from API:', data.cards);
+        console.log('Cards fetched from API:', data);
         setCards(data.cards || []);
       } else {
         console.error('Error fetching cards:', response.statusText);
@@ -105,7 +103,8 @@ export default function CardsPage() {
     setLoading(false);
   };
 
-  const maskCardNumber = (cardNumber: string, show: boolean) => {
+  const maskCardNumber = (cardNumber: string | null, show: boolean) => {
+    if (!cardNumber) return '**** **** **** ****';
     if (show) return cardNumber.match(/.{1,4}/g)?.join(' ') || cardNumber;
     return `**** **** **** ${cardNumber.slice(-4)}`;
   };
@@ -137,15 +136,6 @@ export default function CardsPage() {
         return;
       }
 
-      // Get user's checking account for debit/credit cards
-      const { data: accounts } = await supabase
-        .from('accounts')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('account_type', 'checking')
-        .limit(1)
-        .single();
-
       // Get access token
       const {
         data: { session },
@@ -166,7 +156,6 @@ export default function CardsPage() {
         },
         body: JSON.stringify({
           card_type: selectedCardType,
-          account_id: accounts?.id || null,
         }),
       });
 
@@ -260,12 +249,10 @@ export default function CardsPage() {
                       </div>
                     </div>
                     <Badge
-                      variant={
-                        card.status === 'active' ? 'default' : 'secondary'
-                      }
-                      className="bg-white/20 text-white border-white/30 capitalize"
+                      variant="default"
+                      className="bg-white/20 text-white border-white/30"
                     >
-                      {card.status}
+                      Active
                     </Badge>
                   </div>
                 </CardHeader>
@@ -296,12 +283,14 @@ export default function CardsPage() {
                   <div className="flex items-center justify-between text-sm">
                     <div>
                       <p className="text-white/70 text-xs">Valid Thru</p>
-                      <p className="font-medium">{card.expiry_date}</p>
+                      <p className="font-medium">
+                        {card.expiry_date || '--/--'}
+                      </p>
                     </div>
                     <div>
                       <p className="text-white/70 text-xs">CVV</p>
                       <p className="font-medium font-mono">
-                        {showCardNumbers[card.id] ? card.cvv : '***'}
+                        {showCardNumbers[card.id] ? card.cvv || '***' : '***'}
                       </p>
                     </div>
                   </div>

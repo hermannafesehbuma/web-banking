@@ -4,38 +4,35 @@
 -- Run this in Supabase SQL Editor
 
 -- Create cards table
-CREATE TABLE IF NOT EXISTS public.cards (
+CREATE TABLE IF NOT EXISTS cards (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid NOT NULL REFERENCES public.bank_users(id) ON DELETE CASCADE,
-  account_id uuid REFERENCES public.accounts(id) ON DELETE SET NULL,
+  user_id uuid NOT NULL REFERENCES bank_users(id) ON DELETE CASCADE,
   card_number text NOT NULL UNIQUE,
   card_type text NOT NULL CHECK (card_type IN ('debit', 'credit', 'prepaid')),
   expiry_date text NOT NULL,
   cvv text NOT NULL,
-  status text NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'frozen', 'cancelled')),
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
 -- Create index for faster queries
-CREATE INDEX IF NOT EXISTS idx_cards_user_id ON public.cards(user_id);
-CREATE INDEX IF NOT EXISTS idx_cards_user_status ON public.cards(user_id, status);
+CREATE INDEX IF NOT EXISTS idx_cards_user_id ON cards(user_id);
 
 -- Enable RLS
-ALTER TABLE public.cards ENABLE ROW LEVEL SECURITY;
+ALTER TABLE cards ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
 CREATE POLICY "Users can view own cards" 
-ON public.cards
+ON cards
 FOR SELECT 
 USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can insert own cards" 
-ON public.cards
+ON cards
 FOR INSERT 
 WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "Users can update own cards" 
-ON public.cards
+ON cards
 FOR UPDATE 
 USING (auth.uid() = user_id);
 
