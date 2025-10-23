@@ -594,7 +594,88 @@ export const emailTemplates = {
     `,
   }),
 
-  // 11. KYC Submitted (Admin Notification)
+  // 11. Refund Approved (User Notification)
+  refundApproved: (userName: string, amount: number, refundId: string) => ({
+    subject: `✅ Refund Approved - $${amount.toFixed(2)}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: #000; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #fff; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb; }
+          .info-box { background: #f9fafb; border-left: 4px solid #000; padding: 20px; margin: 20px 0; border-radius: 8px; }
+          .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
+          .detail-row:last-child { border-bottom: none; }
+          .button { display: inline-block; padding: 12px 24px; background: #000; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #6b7280; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>✅ Refund Approved</h1>
+            <p style="margin: 10px 0 0 0; opacity: 0.9;">Your refund has been approved</p>
+          </div>
+          <div class="content">
+            <h2>Hi ${userName},</h2>
+            <p>Great news! Your refund has been approved and is ready to be transferred to your checking account.</p>
+            
+            <div class="info-box">
+              <h3 style="margin-top: 0; color: #000;">Refund Details</h3>
+              <div class="detail-row">
+                <span><strong>Amount:</strong></span>
+                <span style="font-size: 18px; font-weight: bold; color: #000;">$${amount.toFixed(
+                  2
+                )}</span>
+              </div>
+              <div class="detail-row">
+                <span><strong>Reference ID:</strong></span>
+                <span style="font-family: monospace;">${refundId}</span>
+              </div>
+              <div class="detail-row">
+                <span><strong>Status:</strong></span>
+                <span style="color: #059669; font-weight: bold;">✅ Approved</span>
+              </div>
+              <div class="detail-row">
+                <span><strong>Date Approved:</strong></span>
+                <span>${new Date().toLocaleDateString()}</span>
+              </div>
+            </div>
+
+            <div style="background: #f9fafb; border-left: 4px solid #374151; padding: 15px; margin: 20px 0; border-radius: 8px;">
+              <p style="margin: 0; color: #374151;"><strong>What happens next?</strong></p>
+              <ul style="margin: 10px 0 0 0; color: #374151;">
+                <li>Your refund will be transferred to your checking account</li>
+                <li>You'll receive another email once the transfer is completed</li>
+                <li>The transfer typically takes 1-3 business days</li>
+                <li>You can track the status in your dashboard</li>
+              </ul>
+            </div>
+
+            <p>You can view your refunds and account balance in your dashboard.</p>
+            
+            <a href="${
+              process.env.NEXT_PUBLIC_APP_URL
+            }/dashboard/refunds" class="button">View My Refunds</a>
+            
+            <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
+              If you have any questions about this refund, please contact our support team.
+            </p>
+          </div>
+          <div class="footer">
+            <p>&copy; 2025 Fortiz Bank. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  }),
+
+  // 12. KYC Submitted (Admin Notification)
   kycSubmittedAdmin: (
     userName: string,
     userEmail: string,

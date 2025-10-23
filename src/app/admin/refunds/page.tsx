@@ -70,6 +70,11 @@ export default function AdminRefundsPage() {
   const [newStatus, setNewStatus] = useState('');
   const [updating, setUpdating] = useState(false);
 
+  // Edit amount modal
+  const [editingAmount, setEditingAmount] = useState<Refund | null>(null);
+  const [newAmount, setNewAmount] = useState('');
+  const [updatingAmount, setUpdatingAmount] = useState(false);
+
   // Details modal
   const [selectedRefund, setSelectedRefund] = useState<Refund | null>(null);
   const [events, setEvents] = useState<RefundEvent[]>([]);
@@ -446,6 +451,31 @@ export default function AdminRefundsPage() {
           is_read: false,
         });
 
+        // Send email notification to user
+        try {
+          const { data: userData } = await supabase
+            .from('bank_users')
+            .select('email, full_name')
+            .eq('id', refund.user_id)
+            .single();
+
+          if (userData) {
+            await fetch('/api/emails/refund-approved', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: userData.email,
+                userName: userData.full_name,
+                amount: refund.amount_cents / 100,
+                refundId: refund.external_ref || refund.id.slice(0, 8),
+              }),
+            });
+            console.log('✅ Refund approved email sent to:', userData.email);
+          }
+        } catch (emailError) {
+          console.error('Failed to send refund approved email:', emailError);
+        }
+
         toast({
           title: 'Refund approved',
           description: 'User has been notified.',
@@ -520,6 +550,71 @@ export default function AdminRefundsPage() {
   const handleEditStatus = (refund: Refund) => {
     setEditingRefund(refund);
     setNewStatus(refund.status);
+  };
+
+  const handleEditAmount = (refund: Refund) => {
+    setEditingAmount(refund);
+    setNewAmount((refund.amount_cents / 100).toString());
+  };
+
+  const handleUpdateAmount = async () => {
+    if (!editingAmount || !newAmount) return;
+
+    setUpdatingAmount(true);
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      const newAmountCents = Math.round(parseFloat(newAmount) * 100);
+
+      const { error } = await supabase
+        .from('refunds')
+        .update({
+          amount_cents: newAmountCents,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', editingAmount.id);
+
+      if (error) {
+        toast({
+          title: 'Error',
+          description: error.message,
+          variant: 'destructive',
+        });
+      } else {
+        // Log event
+        await supabase.from('refund_events').insert({
+          refund_id: editingAmount.id,
+          event_type: 'amount_updated',
+          actor: user?.email || 'admin',
+          message: `Amount updated from $${(
+            editingAmount.amount_cents / 100
+          ).toFixed(2)} to $${parseFloat(newAmount).toFixed(2)} by admin`,
+        });
+
+        toast({
+          title: 'Amount updated',
+          description: `Refund amount updated to $${parseFloat(
+            newAmount
+          ).toFixed(2)}.`,
+        });
+
+        setEditingAmount(null);
+        setNewAmount('');
+        await loadRefunds();
+      }
+    } catch (err) {
+      console.error('Error updating amount:', err);
+      toast({
+        title: 'Error',
+        description: 'Failed to update amount.',
+        variant: 'destructive',
+      });
+    } finally {
+      setUpdatingAmount(false);
+    }
   };
 
   const handleUpdateStatus = async () => {
@@ -603,6 +698,76 @@ export default function AdminRefundsPage() {
           }
         } catch (emailError) {
           console.error('Failed to send refund status email:', emailError);
+        }
+
+        // If status is completed, add the refund amount to user's checking account
+        if (newStatus === 'completed') {
+          try {
+            console.log(
+              '💰 Processing completed refund - adding to checking account'
+            );
+
+            // Get user's checking account
+            const { data: checkingAccount } = await supabase
+              .from('accounts')
+              .select('*')
+              .eq('user_id', editingRefund.user_id)
+              .eq('account_type', 'checking')
+              .single();
+
+            if (checkingAccount) {
+              const refundAmount = editingRefund.amount_cents / 100;
+              const newBalance = checkingAccount.balance + refundAmount;
+
+              // Update account balance
+              const { error: balanceError } = await supabase
+                .from('accounts')
+                .update({ balance: newBalance })
+                .eq('id', checkingAccount.id);
+
+              if (balanceError) {
+                console.error('Error updating account balance:', balanceError);
+              } else {
+                console.log('✅ Account balance updated:', newBalance);
+
+                // Create transaction record
+                const transactionData = {
+                  user_id: editingRefund.user_id,
+                  account_id: checkingAccount.id,
+                  type: 'credit',
+                  amount: refundAmount,
+                  description: `Refund completed - ${
+                    editingRefund.reason
+                  } (Ref: ${
+                    editingRefund.external_ref || editingRefund.id.slice(0, 8)
+                  })`,
+                };
+
+                console.log(
+                  '📝 Creating transaction record with data:',
+                  transactionData
+                );
+
+                const { error: txnError } = await supabase
+                  .from('transactions')
+                  .insert(transactionData);
+
+                if (txnError) {
+                  console.error(
+                    '❌ Error creating transaction record:',
+                    txnError
+                  );
+                  console.error('❌ Transaction data was:', transactionData);
+                } else {
+                  console.log('✅ Transaction record created for refund');
+                }
+              }
+            } else {
+              console.error('No checking account found for user');
+            }
+          } catch (balanceError) {
+            console.error('Failed to update account balance:', balanceError);
+          }
         }
 
         toast({
@@ -834,71 +999,105 @@ export default function AdminRefundsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="overflow-x-auto overflow-y-auto max-h-[70vh] md:max-h-none">
+            <table className="w-full min-w-[800px]">
               <thead>
                 <tr className="border-b text-left">
-                  <th className="pb-3 font-medium text-sm">Reference</th>
-                  <th className="pb-3 font-medium text-sm">User</th>
-                  <th className="pb-3 font-medium text-sm">Amount</th>
-                  <th className="pb-3 font-medium text-sm">Reason</th>
-                  <th className="pb-3 font-medium text-sm">Status</th>
-                  <th className="pb-3 font-medium text-sm">Created</th>
-                  <th className="pb-3 font-medium text-sm">Actions</th>
+                  <th className="pb-3 font-medium text-sm sticky top-0 bg-background">
+                    Reference
+                  </th>
+                  <th className="pb-3 font-medium text-sm sticky top-0 bg-background">
+                    User
+                  </th>
+                  <th className="pb-3 font-medium text-sm sticky top-0 bg-background">
+                    Amount
+                  </th>
+                  <th className="pb-3 font-medium text-sm sticky top-0 bg-background">
+                    Reason
+                  </th>
+                  <th className="pb-3 font-medium text-sm sticky top-0 bg-background">
+                    Status
+                  </th>
+                  <th className="pb-3 font-medium text-sm sticky top-0 bg-background">
+                    Created
+                  </th>
+                  <th className="pb-3 font-medium text-sm sticky top-0 bg-background">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {filteredRefunds.length > 0 ? (
                   filteredRefunds.map((refund) => (
                     <tr key={refund.id} className="border-b last:border-0">
-                      <td className="py-4">
-                        <p className="font-mono text-sm">
+                      <td className="py-3 md:py-4">
+                        <p className="font-mono text-xs md:text-sm">
                           {refund.external_ref || refund.id.slice(0, 8)}
                         </p>
                       </td>
-                      <td className="py-4">
-                        <p className="font-medium text-sm">
+                      <td className="py-3 md:py-4">
+                        <p className="font-medium text-xs md:text-sm">
                           {refund.user_name || 'N/A'}
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground hidden md:block">
                           {refund.user_email}
                         </p>
                       </td>
-                      <td className="py-4">
-                        <p className="font-semibold">
+                      <td className="py-3 md:py-4">
+                        <p className="font-semibold text-sm md:text-base">
                           ${(refund.amount_cents / 100).toFixed(2)}
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground hidden md:block">
                           {refund.currency || 'USD'}
                         </p>
                       </td>
-                      <td className="py-4">
-                        <p className="text-sm capitalize">
+                      <td className="py-3 md:py-4">
+                        <p className="text-xs md:text-sm capitalize">
                           {refund.reason?.replace(/_/g, ' ') || 'N/A'}
                         </p>
                       </td>
-                      <td className="py-4">{getStatusBadge(refund.status)}</td>
-                      <td className="py-4">
-                        <p className="text-sm text-muted-foreground">
+                      <td className="py-3 md:py-4">
+                        {getStatusBadge(refund.status)}
+                      </td>
+                      <td className="py-3 md:py-4">
+                        <p className="text-xs md:text-sm text-muted-foreground">
                           {new Date(refund.created_at).toLocaleDateString()}
                         </p>
                       </td>
-                      <td className="py-4">
-                        <div className="flex gap-2">
+                      <td className="py-3 md:py-4">
+                        <div className="flex gap-1 md:gap-2 flex-wrap">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleViewDetails(refund)}
+                            className="h-8 w-8 md:h-9 md:w-auto md:px-3"
                           >
-                            <Eye className="h-4 w-4" />
+                            <Eye className="h-3 w-3 md:h-4 md:w-4" />
+                            <span className="hidden md:inline ml-1">View</span>
+                          </Button>
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditAmount(refund)}
+                            className="h-8 text-xs md:h-9 md:text-sm"
+                          >
+                            <span className="hidden md:inline">
+                              Edit Amount
+                            </span>
+                            <span className="md:hidden">Amount</span>
                           </Button>
 
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleEditStatus(refund)}
+                            className="h-8 text-xs md:h-9 md:text-sm"
                           >
-                            Edit
+                            <span className="hidden md:inline">
+                              Edit Status
+                            </span>
+                            <span className="md:hidden">Status</span>
                           </Button>
 
                           {refund.status === 'pending' && (
@@ -908,7 +1107,7 @@ export default function AdminRefundsPage() {
                                 size="sm"
                                 onClick={() => handleApprove(refund)}
                                 disabled={processing === refund.id}
-                                className="text-green-600 hover:text-green-700"
+                                className="text-green-600 hover:text-green-700 h-8 w-8"
                               >
                                 <CheckCircle className="h-4 w-4" />
                               </Button>
@@ -917,7 +1116,7 @@ export default function AdminRefundsPage() {
                                 size="sm"
                                 onClick={() => handleReject(refund)}
                                 disabled={processing === refund.id}
-                                className="text-red-600 hover:text-red-700"
+                                className="text-red-600 hover:text-red-700 h-8 w-8"
                               >
                                 <XCircle className="h-4 w-4" />
                               </Button>
@@ -1120,6 +1319,70 @@ export default function AdminRefundsPage() {
                 </Button>
                 <Button onClick={handleUpdateStatus} disabled={updating}>
                   {updating ? 'Updating...' : 'Update Status'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Edit Amount Modal */}
+      {editingAmount && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <Card className="max-w-md w-full">
+            <CardHeader>
+              <CardTitle>Edit Refund Amount</CardTitle>
+              <CardDescription>
+                Update the amount for this refund
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-muted p-4 rounded-lg">
+                <p className="text-sm font-medium mb-1">Refund Details:</p>
+                <p className="text-sm">
+                  Current Amount: $
+                  {(editingAmount.amount_cents / 100).toFixed(2)}
+                </p>
+                <p className="text-sm">User: {editingAmount.user_name}</p>
+                <p className="text-sm">
+                  Status:{' '}
+                  <span className="capitalize">{editingAmount.status}</span>
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="newAmount">New Amount ($)</Label>
+                <Input
+                  id="newAmount"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={newAmount}
+                  onChange={(e) => setNewAmount(e.target.value)}
+                  placeholder="Enter new amount"
+                />
+              </div>
+
+              <div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 p-3 rounded-lg">
+                <p className="text-sm text-yellow-900 dark:text-yellow-100">
+                  <strong>Note:</strong> This change will not notify the user.
+                  Only the amount will be updated.
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditingAmount(null);
+                    setNewAmount('');
+                  }}
+                  disabled={updatingAmount}
+                >
+                  Cancel
+                </Button>
+                <Button onClick={handleUpdateAmount} disabled={updatingAmount}>
+                  {updatingAmount ? 'Updating...' : 'Update Amount'}
                 </Button>
               </div>
             </CardContent>
