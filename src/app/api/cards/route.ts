@@ -157,6 +157,33 @@ export async function POST(request: NextRequest) {
       console.log('API: Alert created for card request');
     }
 
+    // Send email notification
+    try {
+      const { data: userData } = await supabase
+        .from('bank_users')
+        .select('email, full_name, address')
+        .eq('id', user.id)
+        .single();
+
+      if (userData) {
+        await fetch(
+          `${process.env.NEXT_PUBLIC_APP_URL}/api/emails/card-request`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: userData.email,
+              userName: userData.full_name,
+              cardType: card_type,
+              deliveryAddress: userData.address || 'Your registered address',
+            }),
+          }
+        );
+      }
+    } catch (emailError) {
+      console.error('Failed to send card request email:', emailError);
+    }
+
     return NextResponse.json({ card: newCard });
   } catch (error) {
     console.error('API error:', error);

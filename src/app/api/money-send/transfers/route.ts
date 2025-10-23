@@ -246,7 +246,7 @@ export async function POST(request: NextRequest) {
     // 8. CALCULATE SETTLEMENT DATE
     // ========================================================================
     const now = new Date();
-    let scheduledSettlement = new Date(now);
+    const scheduledSettlement = new Date(now);
 
     if (transfer_type === 'internal') {
       // 1 business day (skip weekends)
@@ -346,6 +346,59 @@ export async function POST(request: NextRequest) {
       status: 'pending',
     });
 
+    // Create transaction record for user's transaction history
+    const reference = `SEND-${Date.now()}`;
+    let transactionDescription = description || '';
+
+    if (transfer_type === 'interbank' && external_account_id) {
+      const { data: extAccount } = await supabase
+        .from('external_accounts')
+        .select('bank_name, account_number')
+        .eq('id', external_account_id)
+        .single();
+
+      if (extAccount) {
+        transactionDescription =
+          description ||
+          `Transfer to ${
+            extAccount.bank_name
+          } ****${extAccount.account_number.slice(-4)}`;
+      }
+    } else if (transfer_type === 'internal' && to_account_id) {
+      const { data: toAcc } = await supabase
+        .from('accounts')
+        .select('account_type')
+        .eq('id', to_account_id)
+        .single();
+
+      if (toAcc) {
+        transactionDescription =
+          description || `Transfer to ${toAcc.account_type} account`;
+      }
+    }
+
+    await supabase.from('transactions').insert({
+      user_id: user.id,
+      account_id: from_account_id,
+      type: 'debit',
+      category: 'transfer',
+      amount: totalAmount,
+      status: requiresVerification ? 'pending' : 'completed',
+      description: transactionDescription,
+      reference_number: reference,
+      balance_after: newBalance,
+      metadata: {
+        fee: fee,
+        original_amount: transferAmount,
+        transfer_type: transfer_type,
+        memo: memo,
+        requires_verification: requiresVerification,
+        external_account_id:
+          transfer_type === 'interbank' ? external_account_id : null,
+        transfer_id: transfer.id,
+      },
+    });
+
     // If internal, create pending credit for receiver
     if (transfer_type === 'internal' && to_account_id) {
       const { data: toAccount } = await supabase
@@ -385,6 +438,33 @@ export async function POST(request: NextRequest) {
       severity: 'info',
       is_read: false,
     });
+
+    // ========================================================================
+    // 13. SEND EMAIL NOTIFICATION
+    // ========================================================================
+    try {
+      const { data: userData } = await supabase
+        .from('bank_users')
+        .select('email, full_name')
+        .eq('id', user.id)
+        .single();
+
+      if (userData) {
+        await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/emails/transfer`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: userData.email,
+            userName: userData.full_name,
+            amount: totalAmount,
+            recipient: transactionDescription,
+            reference: reference,
+          }),
+        });
+      }
+    } catch (emailError) {
+      console.error('Failed to send transfer email:', emailError);
+    }
 
     console.log('API: Transfer created successfully:', transfer.id);
 

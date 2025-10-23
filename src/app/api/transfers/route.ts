@@ -120,24 +120,46 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Transfer failed' }, { status: 500 });
     }
 
+    const newFromBalance = fromAccount.balance - amount;
+    const newToBalance = toAccount.balance + amount;
+    const reference = `TXN-${Date.now()}`;
+
     // 3. Create debit transaction
     await supabase.from('transactions').insert({
       user_id: user.id,
       account_id: from_account_id,
-      amount: -amount,
-      type: 'transfer',
+      type: 'debit',
       category: 'transfer',
-      description: description || `Transfer to ${toAccount.account_type}`,
+      amount: amount,
+      status: 'completed',
+      description:
+        description || `Transfer to ${toAccount.account_type} account`,
+      reference_number: reference,
+      balance_after: newFromBalance,
+      metadata: {
+        from_account_type: fromAccount.account_type,
+        to_account_type: toAccount.account_type,
+        transfer_type: 'internal',
+      },
     });
 
     // 4. Create credit transaction
     await supabase.from('transactions').insert({
       user_id: user.id,
       account_id: to_account_id,
-      amount: amount,
-      type: 'transfer',
+      type: 'credit',
       category: 'transfer',
-      description: description || `Transfer from ${fromAccount.account_type}`,
+      amount: amount,
+      status: 'completed',
+      description:
+        description || `Transfer from ${fromAccount.account_type} account`,
+      reference_number: reference,
+      balance_after: newToBalance,
+      metadata: {
+        from_account_type: fromAccount.account_type,
+        to_account_type: toAccount.account_type,
+        transfer_type: 'internal',
+      },
     });
 
     // 5. Create alert
@@ -151,6 +173,31 @@ export async function POST(request: NextRequest) {
       severity: 'success',
       is_read: false,
     });
+
+    // 6. Send email notification
+    try {
+      const { data: userData } = await supabase
+        .from('bank_users')
+        .select('email, full_name')
+        .eq('id', user.id)
+        .single();
+
+      if (userData) {
+        await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/emails/transfer`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: userData.email,
+            userName: userData.full_name,
+            amount: amount,
+            recipient: `${toAccount.account_type} account`,
+            reference: reference,
+          }),
+        });
+      }
+    } catch (emailError) {
+      console.error('Failed to send transfer email:', emailError);
+    }
 
     console.log('API: Transfer completed successfully');
 

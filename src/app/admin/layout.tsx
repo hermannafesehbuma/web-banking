@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Users,
   Wallet,
+  DollarSign,
   ArrowLeftRight,
   FileText,
   Bell,
@@ -23,6 +24,7 @@ const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Accounts', href: '/admin/accounts', icon: Wallet },
+  { name: 'Refunds', href: '/admin/refunds', icon: DollarSign },
   { name: 'Transactions', href: '/admin/transactions', icon: ArrowLeftRight },
   { name: 'Reports', href: '/admin/reports', icon: FileText },
   { name: 'Notifications', href: '/admin/notifications', icon: Bell },
@@ -42,6 +44,7 @@ export default function AdminLayout({
 
   useEffect(() => {
     checkAdminAccess();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkAdminAccess = async () => {
@@ -50,25 +53,50 @@ export default function AdminLayout({
         data: { user },
       } = await supabase.auth.getUser();
 
+      console.log('🔍 Admin check - User:', user?.email, 'ID:', user?.id);
+
       if (!user) {
-        router.push('/auth/login');
+        console.log('❌ No user found, redirecting to login');
+        window.location.href = '/auth/login';
         return;
       }
 
-      // Check if user has admin role
-      const { data: roleData, error: roleError } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .single();
+      // Specific admin user ID
+      const ADMIN_USER_ID = '46d859b7-8231-44f9-9d3f-d5c2d53c5a53';
 
-      if (roleError || !roleData || roleData.role !== 'admin') {
-        // Not an admin, redirect to regular dashboard
-        router.push('/dashboard');
-        return;
+      // Check if user is the specific admin OR has admin role in user_roles table
+      const isSpecificAdmin = user.id === ADMIN_USER_ID;
+
+      console.log('🎯 Admin check:', {
+        userId: user.id,
+        adminUserId: ADMIN_USER_ID,
+        isSpecificAdmin,
+      });
+
+      if (!isSpecificAdmin) {
+        // Check user_roles table as backup
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .single();
+
+        const hasAdminRole =
+          roleData?.role &&
+          ['admin', 'super_admin'].includes(roleData.role.toLowerCase().trim());
+
+        console.log('📋 Role check:', { roleData, hasAdminRole });
+
+        if (!hasAdminRole) {
+          console.log('❌ Access denied - not admin user');
+          window.location.href = '/dashboard';
+          return;
+        }
       }
 
-      // Get admin name
+      console.log('✅ Admin access granted');
+
+      // Get admin name from bank_users if exists, otherwise use email
       const { data: userData } = await supabase
         .from('bank_users')
         .select('full_name')
@@ -79,7 +107,7 @@ export default function AdminLayout({
       setLoading(false);
     } catch (error) {
       console.error('Admin access check error:', error);
-      router.push('/dashboard');
+      window.location.href = '/dashboard';
     }
   };
 
@@ -119,7 +147,12 @@ export default function AdminLayout({
           {/* Logo */}
           <div className="h-16 flex items-center justify-between px-6 border-b">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-md bg-primary" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/fortiz.png"
+                alt="Fortiz Bank"
+                className="h-8 w-8 rounded-md object-cover"
+              />
               <span className="font-semibold">Admin Panel</span>
             </div>
             <Button
@@ -210,4 +243,3 @@ export default function AdminLayout({
     </div>
   );
 }
-

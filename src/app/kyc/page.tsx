@@ -148,6 +148,14 @@ export default function KycPage() {
     return selfie !== null;
   };
 
+  // Sanitize filename to remove spaces and special characters
+  const sanitizeFilename = (filename: string): string => {
+    return filename
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/[^a-zA-Z0-9.-]/g, '') // Remove special characters
+      .toLowerCase();
+  };
+
   const uploadFile = async (file: File, path: string): Promise<string> => {
     const { error: uploadErr } = await supabase.storage
       .from('fortiz-storage')
@@ -201,7 +209,8 @@ export default function KycPage() {
       // Upload document front
       if (documentFront) {
         console.log('Uploading front document...');
-        const path = `${userId}/id-front-${timestamp}-${documentFront.file.name}`;
+        const sanitizedName = sanitizeFilename(documentFront.file.name);
+        const path = `${userId}/id-front-${timestamp}-${sanitizedName}`;
         const url = await uploadFile(documentFront.file, path);
         documentUrls.push(url);
         uploaded++;
@@ -211,7 +220,8 @@ export default function KycPage() {
 
       // Upload document back if exists
       if (documentBack) {
-        const path = `${userId}/id-back-${timestamp}-${documentBack.file.name}`;
+        const sanitizedName = sanitizeFilename(documentBack.file.name);
+        const path = `${userId}/id-back-${timestamp}-${sanitizedName}`;
         const url = await uploadFile(documentBack.file, path);
         documentUrls.push(url);
         uploaded++;
@@ -220,13 +230,15 @@ export default function KycPage() {
 
       // Upload selfie
       if (selfie) {
-        const path = `${userId}/selfie-${timestamp}-${selfie.file.name}`;
+        const sanitizedSelfieName = sanitizeFilename(selfie.file.name);
+        const path = `${userId}/selfie-${timestamp}-${sanitizedSelfieName}`;
         const selfieUrl = await uploadFile(selfie.file, path);
         uploaded++;
         setUploadProgress(Math.round((uploaded / totalFiles) * 100));
 
         // Upload proof of address
-        const proofPath = `${userId}/proof-address-${timestamp}-${proofOfAddress.file.name}`;
+        const sanitizedProofName = sanitizeFilename(proofOfAddress.file.name);
+        const proofPath = `${userId}/proof-address-${timestamp}-${sanitizedProofName}`;
         const proofUrl = await uploadFile(proofOfAddress.file, proofPath);
         uploaded++;
         setUploadProgress(100);
@@ -257,6 +269,53 @@ export default function KycPage() {
         }
 
         console.log('KYC submitted successfully!', inserted);
+
+        // Send email notification to user
+        try {
+          const { data: userData } = await supabase
+            .from('bank_users')
+            .select('email, full_name')
+            .eq('id', userId)
+            .single();
+
+          if (userData) {
+            await fetch('/api/emails/kyc-submitted', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: userData.email,
+                userName: userData.full_name,
+              }),
+            });
+            console.log('✅ KYC submitted email sent to user:', userData.email);
+          }
+        } catch (emailError) {
+          console.error(
+            'Failed to send KYC submitted email to user:',
+            emailError
+          );
+        }
+
+        // Send admin notification email
+        try {
+          console.log('📧 Sending admin notification for KYC submission...');
+          await fetch('/api/emails/kyc-submitted-admin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              adminEmail: 'contact@fortizb.com',
+              userName: userData?.full_name || 'Unknown User',
+              userEmail: userData?.email || 'unknown@example.com',
+              submissionId: inserted[0]?.id || 'unknown',
+              idType: idType,
+              address: address,
+              phoneNumber: phoneNumber,
+            }),
+          });
+          console.log('✅ Admin notification sent for KYC submission');
+        } catch (adminEmailError) {
+          console.error('Failed to send admin notification:', adminEmailError);
+        }
 
         setTimeout(() => router.push('/kyc/status'), 1000);
       }

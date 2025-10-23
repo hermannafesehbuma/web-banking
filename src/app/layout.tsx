@@ -20,6 +20,11 @@ export const metadata: Metadata = {
   title: 'Fortiz Bank — Modern Digital Banking',
   description:
     'Trusted, secure, and modern banking. Open an account with Fortiz Bank.',
+  icons: {
+    icon: '/fortiz.png',
+    shortcut: '/fortiz.png',
+    apple: '/fortiz.png',
+  },
 };
 
 export default function RootLayout({
@@ -43,7 +48,12 @@ export default function RootLayout({
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                       <div>
                         <div className="flex items-center gap-2">
-                          <div className="h-7 w-7 rounded-md bg-primary" />
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src="/fortiz.png"
+                            alt="Fortiz Bank"
+                            className="h-7 w-7 rounded-md object-cover"
+                          />
                           <span className="text-sm font-semibold">
                             Fortiz Bank
                           </span>
@@ -58,6 +68,14 @@ export default function RootLayout({
                           <li>
                             <a className="hover:text-foreground" href="/about">
                               About
+                            </a>
+                          </li>
+                          <li>
+                            <a
+                              className="hover:text-foreground"
+                              href="/testimonials"
+                            >
+                              Testimonials
                             </a>
                           </li>
                           <li>

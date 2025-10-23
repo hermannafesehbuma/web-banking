@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Users,
   UserCheck,
@@ -21,8 +22,6 @@ import {
 import {
   LineChart,
   Line,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -38,6 +37,13 @@ type Metrics = {
   totalWithdrawals: number;
   activeAccounts: number;
   totalTransactions: number;
+};
+
+type MonthlyData = {
+  month: string;
+  deposits: number;
+  withdrawals: number;
+  savings: number;
 };
 
 type RecentActivity = {
@@ -57,7 +63,7 @@ export default function AdminDashboard() {
     activeAccounts: 0,
     totalTransactions: 0,
   });
-  const [monthlyData, setMonthlyData] = useState<any[]>([]);
+  const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -166,8 +172,37 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <p className="text-muted-foreground">Loading dashboard...</p>
+      <div className="space-y-8">
+        <div>
+          <Skeleton className="h-8 w-64 mb-2" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+
+        {/* Skeleton Metrics */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-4 w-24" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-20 mb-2" />
+                <Skeleton className="h-3 w-32" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Skeleton Chart */}
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-5 w-40 mb-2" />
+            <Skeleton className="h-4 w-64" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-80 w-full" />
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -335,7 +370,9 @@ export default function AdminDashboard() {
       <Card>
         <CardHeader>
           <CardTitle>Recent Activity</CardTitle>
-          <CardDescription>Latest transactions across the platform</CardDescription>
+          <CardDescription>
+            Latest transactions across the platform
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -385,4 +422,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-

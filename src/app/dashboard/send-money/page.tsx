@@ -273,13 +273,12 @@ export default function SendMoneyPage() {
       const { error: txnError } = await supabase.from('transactions').insert({
         user_id: user.id,
         account_id: fromAccountId,
-        amount: -parseFloat(amount),
-        type: 'transfer',
-        direction: 'debit',
+        amount: parseFloat(amount),
+        type: 'debit',
         category: 'transfer',
-        status: 'posted',
+        status: 'completed',
         description: `Sent to ${recipientName} at ${bankName}`,
-        reference: `EXT-${Date.now()}`,
+        reference_number: `EXT-${Date.now()}`,
         metadata: {
           recipient_name: recipientName,
           bank_name: bankName,

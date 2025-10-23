@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { DashboardNav } from '@/components/dashboard-nav';
 import { useToast } from '@/components/ui/simple-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   PieChart,
   Pie,
@@ -108,6 +109,7 @@ export default function DashboardPage() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [savingsGoal, setSavingsGoal] = useState<SavingsGoal | null>(null);
   const [statements, setStatements] = useState<Statement[]>([]);
+  const [pendingRefundsAmount, setPendingRefundsAmount] = useState(0);
 
   // Transfer form state
   const [fromAccountId, setFromAccountId] = useState('');
@@ -293,6 +295,24 @@ export default function DashboardPage() {
           setSpendingByCategory(spendingData.spending || []);
         }
 
+        // Fetch pending refunds (not cancelled, failed, or completed)
+        console.log('🔄 Fetching pending refunds for user:', user.id);
+        const { data: refunds, error: refundsError } = await supabase
+          .from('refunds')
+          .select('amount_cents, status')
+          .eq('user_id', user.id)
+          .not('status', 'in', '("cancelled","failed","completed")');
+
+        if (refundsError) {
+          console.error('❌ Error fetching refunds:', refundsError);
+        } else {
+          const pendingAmount =
+            (refunds || []).reduce((sum, r) => sum + r.amount_cents, 0) / 100;
+          console.log('💵 PENDING REFUNDS:', refunds);
+          console.log('💵 TOTAL PENDING AMOUNT:', pendingAmount);
+          setPendingRefundsAmount(pendingAmount);
+        }
+
         console.log('✅ ALL DASHBOARD DATA LOADED SUCCESSFULLY');
       } catch (err) {
         console.error('❌ Error loading dashboard:', err);
@@ -301,7 +321,56 @@ export default function DashboardPage() {
     setLoading(false);
   };
 
-  if (loading) return null;
+  // Show loading skeletons
+  if (loading) {
+    return (
+      <>
+        <DashboardNav />
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+          <Skeleton className="h-8 w-48 mb-6" />
+
+          {/* Skeleton Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {[1, 2, 3, 4].map((i) => (
+              <Card key={i}>
+                <CardHeader>
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-3 w-32 mt-2" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-8 w-28" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Skeleton Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <Card>
+                <CardHeader>
+                  <Skeleton className="h-5 w-40" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-64 w-full" />
+                </CardContent>
+              </Card>
+            </div>
+            <div>
+              <Card>
+                <CardHeader>
+                  <Skeleton className="h-5 w-32" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-64 w-full" />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   // If KYC not approved, show gating message
   if (kycStatus !== 'approved') {
@@ -413,10 +482,10 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="text-3xl font-semibold tracking-tight text-amber-600">
-                  $0.00
+                  ${pendingRefundsAmount.toFixed(2)}
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Will be available soon
+                  From pending refunds
                 </p>
               </CardContent>
             </Card>

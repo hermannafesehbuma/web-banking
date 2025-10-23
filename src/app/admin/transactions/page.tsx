@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/simple-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Search, Download, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
 type Transaction = {
@@ -43,6 +44,7 @@ export default function AdminTransactionsPage() {
 
   useEffect(() => {
     loadTransactions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -128,11 +130,10 @@ export default function AdminTransactionsPage() {
 
   const getTypeBadge = (type: string) => {
     const colors: Record<string, string> = {
-      deposit: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-      withdrawal:
-        'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-      transfer:
-        'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+      deposit:
+        'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+      withdrawal: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+      transfer: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
       payment:
         'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
     };
@@ -146,8 +147,40 @@ export default function AdminTransactionsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <p className="text-muted-foreground">Loading transactions...</p>
+      <div className="space-y-6">
+        <div>
+          <Skeleton className="h-8 w-40 mb-2" />
+          <Skeleton className="h-4 w-80" />
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-4 w-24" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-20" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <Card>
+          <CardContent className="pt-6">
+            <Skeleton className="h-10 w-full" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-20 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -261,7 +294,9 @@ export default function AdminTransactionsPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Transactions ({filteredTransactions.length})</CardTitle>
+              <CardTitle>
+                Transactions ({filteredTransactions.length})
+              </CardTitle>
               <CardDescription>
                 Showing {filteredTransactions.length} of {transactions.length}{' '}
                 transactions
@@ -319,9 +354,7 @@ export default function AdminTransactionsPage() {
                           )}
                           <span
                             className={`font-semibold ${
-                              txn.amount > 0
-                                ? 'text-green-600'
-                                : 'text-red-600'
+                              txn.amount > 0 ? 'text-green-600' : 'text-red-600'
                             }`}
                           >
                             ${Math.abs(txn.amount).toFixed(2)}
@@ -365,4 +398,3 @@ export default function AdminTransactionsPage() {
     </div>
   );
 }
-

@@ -33,6 +33,7 @@ const navigationItems = [
     href: '/about',
     submenu: [
       { name: 'About Us', href: '/about' },
+      { name: 'Testimonials', href: '/testimonials' },
       { name: 'Careers', href: '/careers' },
       { name: 'Customer Stories', href: '/' },
     ],
@@ -83,7 +84,12 @@ export function MainHeader() {
             href="/"
             className="flex items-center gap-2 hover:opacity-80 transition-opacity"
           >
-            <div className="h-8 w-8 rounded-md bg-primary" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/fortiz.png"
+              alt="Fortiz Bank"
+              className="h-8 w-8 rounded-md object-cover"
+            />
             <span className="text-base font-semibold tracking-tight">
               Fortiz Bank
             </span>

@@ -35,6 +35,7 @@ type KycSubmission = {
 export default function AdminKycPage() {
   const [submissions, setSubmissions] = useState<KycSubmission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
   useEffect(() => {
     loadSubmissions();
@@ -50,12 +51,72 @@ export default function AdminKycPage() {
   };
 
   const updateStatus = async (id: string, newStatus: string) => {
-    const { error } = await supabase
-      .from('kyc_submissions')
-      .update({ status: newStatus, reviewed_at: new Date().toISOString() })
-      .eq('id', id);
-    if (!error) {
+    console.log(`📧 Updating KYC status to ${newStatus} for submission ${id}`);
+    setUpdatingStatus(id);
+
+    try {
+      // Update the KYC submission status
+      const { error } = await supabase
+        .from('kyc_submissions')
+        .update({ status: newStatus, reviewed_at: new Date().toISOString() })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error updating KYC status:', error);
+        return;
+      }
+
+      console.log(`✅ KYC status updated to ${newStatus}`);
+
+      // Get the submission details for email notification
+      const { data: submission } = await supabase
+        .from('kyc_submissions')
+        .select('*, bank_users(full_name, email)')
+        .eq('id', id)
+        .single();
+
+      if (submission && submission.bank_users) {
+        console.log(
+          `📧 Sending ${newStatus} email to user:`,
+          submission.bank_users.email
+        );
+
+        try {
+          // Send appropriate email based on status
+          if (newStatus === 'approved') {
+            await fetch('/api/emails/kyc-approved', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: submission.bank_users.email,
+                userName: submission.bank_users.full_name,
+              }),
+            });
+            console.log('✅ KYC approved email sent');
+          } else if (newStatus === 'rejected') {
+            await fetch('/api/emails/kyc-rejected', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: submission.bank_users.email,
+                userName: submission.bank_users.full_name,
+                reason: 'Documents did not meet verification requirements', // You can make this configurable
+              }),
+            });
+            console.log('✅ KYC rejected email sent');
+          }
+        } catch (emailError) {
+          console.error('Failed to send KYC status email:', emailError);
+          // Don't fail the status update if email fails
+        }
+      }
+
+      // Reload submissions to show updated status
       loadSubmissions();
+    } catch (err) {
+      console.error('Error in updateStatus:', err);
+    } finally {
+      setUpdatingStatus(null);
     }
   };
 
@@ -173,15 +234,17 @@ export default function AdminKycPage() {
                   <Button
                     size="sm"
                     onClick={() => updateStatus(sub.id, 'approved')}
+                    disabled={updatingStatus === sub.id}
                   >
-                    Approve
+                    {updatingStatus === sub.id ? 'Processing...' : 'Approve'}
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => updateStatus(sub.id, 'rejected')}
+                    disabled={updatingStatus === sub.id}
                   >
-                    Reject
+                    {updatingStatus === sub.id ? 'Processing...' : 'Reject'}
                   </Button>
                 </div>
               )}

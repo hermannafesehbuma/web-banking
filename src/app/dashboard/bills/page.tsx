@@ -185,16 +185,17 @@ export default function BillsPage() {
       }
 
       // 2. Create transaction record
+      const reference = `BILL-${Date.now()}`;
       const { error: txnError } = await supabase.from('transactions').insert({
         user_id: user.id,
         account_id: fromAccountId,
-        amount: -parseFloat(amount),
-        type: 'payment',
-        direction: 'debit',
-        category: payeeCategory || 'bill_payment',
-        status: 'posted',
+        type: 'debit',
+        category: 'bills_utilities',
+        amount: parseFloat(amount),
+        status: 'completed',
         description: `Bill payment to ${payeeName}`,
-        reference: `BILL-${Date.now()}`,
+        reference_number: reference,
+        balance_after: newBalance,
         metadata: {
           payee_name: payeeName,
           payee_category: payeeCategory,
@@ -206,9 +207,44 @@ export default function BillsPage() {
 
       if (txnError) {
         console.error('Transaction error:', txnError);
+        toast({
+          title: 'Payment failed',
+          description: 'Could not create transaction record.',
+          variant: 'destructive',
+        });
+        setPaying(false);
+        return;
       }
 
-      // 3. Create alert
+      // 3. Send email confirmation
+      try {
+        const { data: bankUser } = await supabase
+          .from('bank_users')
+          .select('full_name, email')
+          .eq('id', user.id)
+          .single();
+
+        if (bankUser?.email) {
+          await fetch('/api/emails/bill-payment', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: bankUser.email,
+              userName: bankUser.full_name,
+              amount: parseFloat(amount),
+              payeeName: payeeName,
+              reference: reference,
+            }),
+          });
+        }
+      } catch (emailError) {
+        console.error('Email error:', emailError);
+        // Don't fail the payment if email fails
+      }
+
+      // 4. Create alert
       await supabase.from('alerts').insert({
         user_id: user.id,
         type: 'general',

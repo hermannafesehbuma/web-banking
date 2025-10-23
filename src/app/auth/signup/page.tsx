@@ -47,10 +47,24 @@ export default function SignupPage() {
       });
       if (insertErr) throw insertErr;
 
+      // Send welcome email
+      try {
+        await fetch('/api/emails/welcome', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            userName: fullName,
+          }),
+        });
+      } catch (emailError) {
+        console.error('Failed to send welcome email:', emailError);
+      }
+
       setMessage('Check your email to verify your account.');
       router.push('/auth/verify');
-    } catch (err: any) {
-      setError(err.message ?? 'Something went wrong');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setLoading(false);
     }

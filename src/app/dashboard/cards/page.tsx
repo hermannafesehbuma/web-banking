@@ -23,6 +23,7 @@ import {
   Send,
 } from 'lucide-react';
 import { DashboardNav } from '@/components/dashboard-nav';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
   DialogContent,
@@ -195,7 +196,33 @@ export default function CardsPage() {
     }
   };
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <>
+        <DashboardNav />
+        <div className="mx-auto w-full max-w-7xl px-6 py-8 md:py-12">
+          <div className="mb-8">
+            <Skeleton className="h-9 w-48 mb-2" />
+            <Skeleton className="h-5 w-96" />
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardHeader>
+                  <Skeleton className="h-5 w-32 mb-2" />
+                  <Skeleton className="h-4 w-48" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-48 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>

@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 import {
   LayoutDashboard,
   CreditCard,
+  DollarSign,
+  Receipt,
   HeadphonesIcon,
   Bell,
   Moon,
@@ -13,6 +15,7 @@ import {
   Laptop,
   Menu,
   X,
+  Shield,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,12 +31,14 @@ import { cn } from '@/lib/utils';
 
 export function DashboardNav() {
   const pathname = usePathname();
-  const { theme, setTheme } = useTheme();
+  const { setTheme } = useTheme();
   const [unreadCount, setUnreadCount] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     loadUnreadCount();
+    checkAdminStatus();
   }, [pathname]);
 
   // Close mobile menu when pathname changes
@@ -57,6 +62,24 @@ export function DashboardNav() {
     setUnreadCount(count ?? 0);
   };
 
+  const checkAdminStatus = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return;
+
+    const { data: roleData } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single();
+
+    if (roleData && ['admin', 'super_admin'].includes(roleData.role)) {
+      setIsAdmin(true);
+    }
+  };
+
   const navItems = [
     {
       name: 'Overview',
@@ -64,9 +87,19 @@ export function DashboardNav() {
       icon: LayoutDashboard,
     },
     {
+      name: 'Transactions',
+      href: '/dashboard/transactions',
+      icon: Receipt,
+    },
+    {
       name: 'Cards',
       href: '/dashboard/cards',
       icon: CreditCard,
+    },
+    {
+      name: 'Refunds',
+      href: '/dashboard/refunds',
+      icon: DollarSign,
     },
     {
       name: 'Support',
@@ -79,6 +112,15 @@ export function DashboardNav() {
       icon: Bell,
       badge: unreadCount,
     },
+    ...(isAdmin
+      ? [
+          {
+            name: 'Admin Panel',
+            href: '/admin',
+            icon: Shield,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -115,7 +157,7 @@ export function DashboardNav() {
                     >
                       <Icon className="h-4 w-4 mr-2" />
                       {item.name}
-                      {item.badge && item.badge > 0 && (
+                      {item.badge !== undefined && item.badge > 0 && (
                         <Badge
                           variant="destructive"
                           className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px]"
@@ -141,9 +183,8 @@ export function DashboardNav() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
-                  {theme === 'light' && <Sun className="h-4 w-4" />}
-                  {theme === 'dark' && <Moon className="h-4 w-4" />}
-                  {theme === 'system' && <Laptop className="h-4 w-4" />}
+                  <Sun className="h-4 w-4 dark:hidden" />
+                  <Moon className="h-4 w-4 hidden dark:block" />
                   <span className="ml-2 hidden lg:inline">Theme</span>
                 </Button>
               </DropdownMenuTrigger>
@@ -194,7 +235,7 @@ export function DashboardNav() {
                 >
                   <Icon className="h-5 w-5 mr-3" />
                   <span className="flex-1 text-left">{item.name}</span>
-                  {item.badge && item.badge > 0 && (
+                  {item.badge !== undefined && item.badge > 0 && (
                     <Badge
                       variant="destructive"
                       className="h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px]"

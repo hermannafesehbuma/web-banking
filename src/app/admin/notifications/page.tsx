@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/simple-toast';
-import { Send, Users, AlertCircle } from 'lucide-react';
+import { Send, AlertCircle } from 'lucide-react';
 
 export default function AdminNotificationsPage() {
   const { toast } = useToast();
@@ -22,7 +22,9 @@ export default function AdminNotificationsPage() {
 
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
-  const [severity, setSeverity] = useState<'info' | 'success' | 'warning' | 'error'>('info');
+  const [severity, setSeverity] = useState<
+    'info' | 'success' | 'warning' | 'error'
+  >('info');
   const [targetType, setTargetType] = useState<'all' | 'pending_kyc'>('all');
 
   const handleSendNotification = async (e: React.FormEvent) => {
@@ -116,9 +118,7 @@ export default function AdminNotificationsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Send Notification</CardTitle>
-          <CardDescription>
-            Broadcast a notification to users
-          </CardDescription>
+          <CardDescription>Broadcast a notification to users</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSendNotification} className="space-y-6">
@@ -217,9 +217,7 @@ export default function AdminNotificationsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Quick Templates</CardTitle>
-          <CardDescription>
-            Common notification templates
-          </CardDescription>
+          <CardDescription>Common notification templates</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -268,7 +266,7 @@ export default function AdminNotificationsPage() {
               onClick={() => {
                 setTitle('New Feature Available');
                 setMessage(
-                  'We\'ve just launched [FEATURE]! Check it out in your dashboard.'
+                  "We've just launched [FEATURE]! Check it out in your dashboard."
                 );
                 setSeverity('success');
               }}
@@ -305,4 +303,3 @@ export default function AdminNotificationsPage() {
     </div>
   );
 }
-

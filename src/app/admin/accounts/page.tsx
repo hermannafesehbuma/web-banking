@@ -13,7 +13,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/simple-toast';
-import { Search, Lock, Unlock } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Search, Lock } from 'lucide-react';
 
 type Account = {
   id: string;
@@ -36,6 +37,7 @@ export default function AdminAccountsPage() {
 
   useEffect(() => {
     loadAccounts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -46,14 +48,19 @@ export default function AdminAccountsPage() {
   const loadAccounts = async () => {
     try {
       // Get accounts with user info
-      const { data, error } = await supabase.from('accounts').select(`
+      const { data, error } = await supabase
+        .from('accounts')
+        .select(
+          `
           id,
           user_id,
           account_number,
           account_type,
           balance,
           created_at
-        `).order('created_at', { ascending: false });
+        `
+        )
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error loading accounts:', error);
@@ -99,7 +106,9 @@ export default function AdminAccountsPage() {
           account.account_number
             ?.toLowerCase()
             .includes(searchTerm.toLowerCase()) ||
-          account.user_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          account.user_email
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
           account.user_name?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -116,8 +125,46 @@ export default function AdminAccountsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <p className="text-muted-foreground">Loading accounts...</p>
+      <div className="space-y-6">
+        <div>
+          <Skeleton className="h-8 w-56 mb-2" />
+          <Skeleton className="h-4 w-72" />
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-4 w-24" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-16" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-5 w-20" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-10 w-full" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-5 w-32" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -150,9 +197,7 @@ export default function AdminAccountsPage() {
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">
-              Total Balance
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -163,9 +208,7 @@ export default function AdminAccountsPage() {
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">
-              Account Types
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Account Types</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-sm space-y-1">
@@ -291,4 +334,3 @@ export default function AdminAccountsPage() {
     </div>
   );
 }
-

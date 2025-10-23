@@ -13,7 +13,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/simple-toast';
-import { Search, CheckCircle, XCircle, Clock, Eye } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Search, CheckCircle, XCircle, Clock, Eye, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 type User = {
@@ -32,9 +33,12 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [deleteConfirm, setDeleteConfirm] = useState<User | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -86,6 +90,166 @@ export default function AdminUsersPage() {
     setFilteredUsers(filtered);
   };
 
+  const handleApproveKYC = async (userId: string, userName: string) => {
+    try {
+      // Get user email
+      const { data: userData } = await supabase
+        .from('bank_users')
+        .select('email')
+        .eq('id', userId)
+        .single();
+
+      const { error } = await supabase
+        .from('bank_users')
+        .update({ kyc_status: 'approved' })
+        .eq('id', userId);
+
+      if (error) {
+        console.error('Error approving KYC:', error);
+        toast({
+          title: 'Error',
+          description: error.message || 'Failed to approve KYC.',
+          variant: 'destructive',
+        });
+      } else {
+        // Create alert for user
+        await supabase.from('alerts').insert({
+          user_id: userId,
+          title: 'KYC Approved! 🎉',
+          message:
+            'Your KYC verification has been approved. You now have full access to all features.',
+          type: 'success',
+          is_read: false,
+        });
+
+        // Send email notification
+        if (userData?.email) {
+          try {
+            await fetch('/api/emails/kyc-approved', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: userData.email,
+                userName: userName,
+              }),
+            });
+          } catch (emailError) {
+            console.error('Failed to send email:', emailError);
+          }
+        }
+
+        toast({
+          title: 'KYC Approved',
+          description: `${userName}'s KYC has been approved and notified.`,
+        });
+        await loadUsers();
+      }
+    } catch (err) {
+      console.error('Approve KYC error:', err);
+      toast({
+        title: 'Error',
+        description: 'Failed to approve KYC.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleRejectKYC = async (userId: string, userName: string) => {
+    try {
+      // Get user email
+      const { data: userData } = await supabase
+        .from('bank_users')
+        .select('email')
+        .eq('id', userId)
+        .single();
+
+      const { error } = await supabase
+        .from('bank_users')
+        .update({ kyc_status: 'rejected' })
+        .eq('id', userId);
+
+      if (error) {
+        console.error('Error rejecting KYC:', error);
+        toast({
+          title: 'Error',
+          description: error.message || 'Failed to reject KYC.',
+          variant: 'destructive',
+        });
+      } else {
+        // Send email notification
+        if (userData?.email) {
+          try {
+            await fetch('/api/emails/kyc-rejected', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: userData.email,
+                userName: userName,
+              }),
+            });
+          } catch (emailError) {
+            console.error('Failed to send email:', emailError);
+          }
+        }
+
+        toast({
+          title: 'KYC Rejected',
+          description: `${userName}'s KYC has been rejected and notified.`,
+        });
+        await loadUsers();
+      }
+    } catch (err) {
+      console.error('Reject KYC error:', err);
+      toast({
+        title: 'Error',
+        description: 'Failed to reject KYC.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!deleteConfirm) return;
+
+    setDeleting(true);
+
+    try {
+      // Delete user from bank_users (CASCADE will delete related records)
+      const { error } = await supabase
+        .from('bank_users')
+        .delete()
+        .eq('id', deleteConfirm.id);
+
+      if (error) {
+        console.error('Error deleting user:', error);
+        toast({
+          title: 'Error',
+          description: error.message || 'Failed to delete user.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'User deleted',
+          description: `${
+            deleteConfirm.full_name || deleteConfirm.email
+          } has been removed from the system.`,
+        });
+
+        setDeleteConfirm(null);
+        await loadUsers();
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete user.',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'approved':
@@ -116,8 +280,33 @@ export default function AdminUsersPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <p className="text-muted-foreground">Loading users...</p>
+      <div className="space-y-6">
+        <div>
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-5 w-20" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-10 w-full" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-5 w-32" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -196,23 +385,67 @@ export default function AdminUsersPage() {
                           {user.email}
                         </p>
                       </td>
-                      <td className="py-4">{getStatusBadge(user.kyc_status)}</td>
+                      <td className="py-4">
+                        {getStatusBadge(user.kyc_status)}
+                      </td>
                       <td className="py-4">
                         <p className="text-sm text-muted-foreground">
                           {new Date(user.created_at).toLocaleDateString()}
                         </p>
                       </td>
                       <td className="py-4">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            router.push(`/admin/users/${user.id}`)
-                          }
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
-                        </Button>
+                        <div className="flex gap-2 flex-wrap">
+                          {user.kyc_status === 'pending' && (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  handleApproveKYC(
+                                    user.id,
+                                    user.full_name || user.email
+                                  )
+                                }
+                                className="text-green-600 hover:text-green-700"
+                              >
+                                <CheckCircle className="h-4 w-4 mr-1" />
+                                Approve
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  handleRejectKYC(
+                                    user.id,
+                                    user.full_name || user.email
+                                  )
+                                }
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <XCircle className="h-4 w-4 mr-1" />
+                                Reject
+                              </Button>
+                            </>
+                          )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              router.push(`/admin/users/${user.id}`)
+                            }
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setDeleteConfirm(user)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -228,7 +461,59 @@ export default function AdminUsersPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <Card className="max-w-md w-full">
+            <CardHeader>
+              <CardTitle>Delete User</CardTitle>
+              <CardDescription>This action cannot be undone</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 p-4 rounded-lg">
+                <p className="text-sm text-red-900 dark:text-red-100">
+                  <strong>Warning:</strong> Deleting this user will permanently
+                  remove:
+                </p>
+                <ul className="text-sm text-red-700 dark:text-red-300 mt-2 ml-4 list-disc">
+                  <li>User account and profile</li>
+                  <li>All associated accounts (checking, savings)</li>
+                  <li>Transaction history</li>
+                  <li>KYC documents</li>
+                  <li>Cards and alerts</li>
+                </ul>
+              </div>
+
+              <div className="bg-muted p-4 rounded-lg">
+                <p className="text-sm font-medium mb-1">User to delete:</p>
+                <p className="text-sm">{deleteConfirm.full_name || 'N/A'}</p>
+                <p className="text-xs text-muted-foreground">
+                  {deleteConfirm.email}
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setDeleteConfirm(null)}
+                  disabled={deleting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteUser}
+                  disabled={deleting}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  {deleting ? 'Deleting...' : 'Delete User'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
-
