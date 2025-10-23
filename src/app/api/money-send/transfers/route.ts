@@ -380,12 +380,13 @@ export async function POST(request: NextRequest) {
     await supabase.from('transactions').insert({
       user_id: user.id,
       account_id: from_account_id,
-      type: 'debit',
-      category: 'transfer',
+      transaction_type: 'transfer',
+      direction: 'debit',
       amount: totalAmount,
-      status: requiresVerification ? 'pending' : 'completed',
+      currency: 'USD',
+      status: requiresVerification ? 'pending' : 'posted',
       description: transactionDescription,
-      reference_number: reference,
+      reference: reference,
       balance_after: newBalance,
       metadata: {
         fee: fee,

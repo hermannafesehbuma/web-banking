@@ -22,12 +22,12 @@ import { useToast } from '@/components/ui/simple-toast';
 type Transaction = {
   id: string;
   account_id: string;
-  type: string;
-  category: string;
+  direction: string;
+  transaction_type: string;
   amount: number;
   status: string;
   description: string;
-  reference_number: string;
+  reference: string;
   balance_after: number | null;
   metadata: Record<string, unknown> | null;
   created_at: string;
@@ -111,14 +111,15 @@ export default function TransactionsPage() {
       filtered = filtered.filter(
         (txn) =>
           txn.description.toLowerCase().includes(query) ||
-          txn.reference_number.toLowerCase().includes(query) ||
-          txn.type.toLowerCase().includes(query)
+          txn.reference.toLowerCase().includes(query) ||
+          txn.direction.toLowerCase().includes(query) ||
+          txn.transaction_type.toLowerCase().includes(query)
       );
     }
 
     // Type filter
     if (typeFilter !== 'all') {
-      filtered = filtered.filter((txn) => txn.type === typeFilter);
+      filtered = filtered.filter((txn) => txn.transaction_type === typeFilter);
     }
 
     // Date filter
@@ -146,10 +147,10 @@ export default function TransactionsPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'completed':
+      case 'posted':
         return (
           <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-            Completed
+            Posted
           </Badge>
         );
       case 'pending':
@@ -170,13 +171,25 @@ export default function TransactionsPage() {
             Failed
           </Badge>
         );
+      case 'cancelled':
+        return (
+          <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200">
+            Cancelled
+          </Badge>
+        );
+      case 'reversed':
+        return (
+          <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
+            Reversed
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
   };
 
-  const formatTransactionType = (type: string) => {
-    return type
+  const formatTransactionType = (transactionType: string) => {
+    return transactionType
       .split('_')
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
@@ -186,7 +199,7 @@ export default function TransactionsPage() {
     // Create CSV content
     const headers = [
       'Date',
-      'Type',
+      'Transaction Type',
       'Description',
       'Reference',
       'Amount',
@@ -199,11 +212,11 @@ export default function TransactionsPage() {
       ...filteredTransactions.map((txn) =>
         [
           new Date(txn.created_at).toLocaleDateString(),
-          txn.type,
+          txn.transaction_type,
           `"${txn.description}"`,
-          txn.reference_number,
+          txn.reference,
           txn.amount,
-          txn.type,
+          txn.direction,
           txn.status,
           txn.balance_after || '',
         ].join(',')
@@ -294,12 +307,13 @@ export default function TransactionsPage() {
                 onChange={(e) => setTypeFilter(e.target.value)}
               >
                 <option value="all">All Types</option>
-                <option value="internal_transfer">Internal Transfer</option>
-                <option value="external_transfer">External Transfer</option>
-                <option value="bill_payment">Bill Payment</option>
+                <option value="transfer">Transfer</option>
+                <option value="payment">Payment</option>
                 <option value="refund">Refund</option>
                 <option value="deposit">Deposit</option>
                 <option value="withdrawal">Withdrawal</option>
+                <option value="fee">Fee</option>
+                <option value="interest">Interest</option>
               </select>
 
               {/* Date Filter */}
@@ -359,12 +373,12 @@ export default function TransactionsPage() {
                       {/* Icon */}
                       <div
                         className={`p-2 rounded-full ${
-                          txn.type === 'credit'
+                          txn.direction === 'credit'
                             ? 'bg-green-100 dark:bg-green-900'
                             : 'bg-red-100 dark:bg-red-900'
                         }`}
                       >
-                        {txn.type === 'credit' ? (
+                        {txn.direction === 'credit' ? (
                           <ArrowDownRight className="h-5 w-5 text-green-600 dark:text-green-400" />
                         ) : (
                           <ArrowUpRight className="h-5 w-5 text-red-600 dark:text-red-400" />
@@ -380,9 +394,11 @@ export default function TransactionsPage() {
                           {getStatusBadge(txn.status)}
                         </div>
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                          <span>{formatTransactionType(txn.type)}</span>
+                          <span>
+                            {formatTransactionType(txn.transaction_type)}
+                          </span>
                           <span>•</span>
-                          <span>{txn.reference_number}</span>
+                          <span>{txn.reference}</span>
                           <span>•</span>
                           <span>
                             {new Date(txn.created_at).toLocaleDateString(
@@ -412,12 +428,12 @@ export default function TransactionsPage() {
                     <div className="text-right ml-4">
                       <p
                         className={`text-lg font-bold ${
-                          txn.type === 'credit'
+                          txn.direction === 'credit'
                             ? 'text-green-600 dark:text-green-400'
                             : 'text-red-600 dark:text-red-400'
                         }`}
                       >
-                        {txn.type === 'credit' ? '+' : '-'}$
+                        {txn.direction === 'credit' ? '+' : '-'}$
                         {txn.amount.toFixed(2)}
                       </p>
                       {txn.balance_after !== null && (

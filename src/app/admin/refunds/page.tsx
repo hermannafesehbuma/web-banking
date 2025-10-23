@@ -107,27 +107,75 @@ export default function AdminRefundsPage() {
 
   const loadRefunds = async () => {
     try {
+      console.log('🔍 [ADMIN REFUNDS] Loading refunds...');
+
       const { data, error } = await supabase
         .from('refunds')
         .select('*')
         .order('created_at', { ascending: false });
 
+      console.log('🔍 [ADMIN REFUNDS] Query result:', { data, error });
+
       if (error) {
-        console.error('Error loading refunds:', error);
+        console.error('❌ [ADMIN REFUNDS] Error loading refunds:', error);
+        console.error('❌ [ADMIN REFUNDS] Error code:', error.code);
+        console.error('❌ [ADMIN REFUNDS] Error message:', error.message);
+        console.error('❌ [ADMIN REFUNDS] Error details:', error.details);
+        console.error('❌ [ADMIN REFUNDS] Error hint:', error.hint);
+        console.error(
+          '❌ [ADMIN REFUNDS] Full error object:',
+          JSON.stringify(error, null, 2)
+        );
+
         toast({
           title: 'Error',
-          description: 'Failed to load refunds.',
+          description: `Failed to load refunds: ${
+            error.message || 'Unknown error'
+          }`,
           variant: 'destructive',
         });
       } else {
+        console.log(
+          '✅ [ADMIN REFUNDS] Refunds loaded successfully:',
+          data?.length || 0,
+          'refunds'
+        );
         // Fetch user details
+        console.log(
+          '🔍 [ADMIN REFUNDS] Fetching user details for',
+          data?.length || 0,
+          'refunds'
+        );
         const refundsWithUsers = await Promise.all(
           (data || []).map(async (refund) => {
-            const { data: userData } = await supabase
+            console.log(
+              '🔍 [ADMIN REFUNDS] Fetching user data for refund:',
+              refund.id,
+              'user_id:',
+              refund.user_id
+            );
+
+            const { data: userData, error: userError } = await supabase
               .from('bank_users')
               .select('email, full_name')
               .eq('id', refund.user_id)
               .single();
+
+            if (userError) {
+              console.error(
+                '❌ [ADMIN REFUNDS] Error fetching user data for refund',
+                refund.id,
+                ':',
+                userError
+              );
+            } else {
+              console.log(
+                '✅ [ADMIN REFUNDS] User data fetched for refund',
+                refund.id,
+                ':',
+                userData
+              );
+            }
 
             return {
               ...refund,
@@ -141,7 +189,18 @@ export default function AdminRefundsPage() {
         setFilteredRefunds(refundsWithUsers);
       }
     } catch (err) {
-      console.error('Error:', err);
+      console.error('❌ [ADMIN REFUNDS] Unexpected error:', err);
+      console.error(
+        '❌ [ADMIN REFUNDS] Error details:',
+        JSON.stringify(err, null, 2)
+      );
+      toast({
+        title: 'Error',
+        description: `Failed to load refunds: ${
+          err instanceof Error ? err.message : 'Unknown error'
+        }`,
+        variant: 'destructive',
+      });
     }
     setLoading(false);
   };
@@ -367,10 +426,10 @@ export default function AdminRefundsPage() {
               await supabase.from('transactions').insert({
                 user_id: selectedUserId,
                 account_id: checkingAccount.id,
-                amount: amountValue,
-                type: 'refund',
+                transaction_type: 'refund',
                 direction: 'credit',
-                category: 'refund',
+                amount: amountValue,
+                currency: 'USD',
                 status: 'posted',
                 description: `Refund: ${
                   reasonNotes || reason || 'Approved refund'
@@ -734,13 +793,17 @@ export default function AdminRefundsPage() {
                 const transactionData = {
                   user_id: editingRefund.user_id,
                   account_id: checkingAccount.id,
-                  type: 'credit',
+                  transaction_type: 'refund',
+                  direction: 'credit',
                   amount: refundAmount,
+                  currency: 'USD',
+                  status: 'posted',
                   description: `Refund completed - ${
                     editingRefund.reason
                   } (Ref: ${
                     editingRefund.external_ref || editingRefund.id.slice(0, 8)
                   })`,
+                  reference: `REF-${Date.now().toString().slice(-8)}`,
                 };
 
                 console.log(
@@ -999,7 +1062,7 @@ export default function AdminRefundsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto overflow-y-auto max-h-[70vh] md:max-h-none">
+          <div className="overflow-x-auto overflow-y-auto max-h-[60vh] md:max-h-[70vh] border rounded-lg p-1 bg-gray-50 dark:bg-gray-900/50 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
             <table className="w-full min-w-[800px]">
               <thead>
                 <tr className="border-b text-left">
@@ -1065,7 +1128,7 @@ export default function AdminRefundsPage() {
                         </p>
                       </td>
                       <td className="py-3 md:py-4">
-                        <div className="flex gap-1 md:gap-2 flex-wrap">
+                        <div className="flex gap-1 md:gap-2 flex-wrap items-center">
                           <Button
                             variant="outline"
                             size="sm"
@@ -1107,18 +1170,18 @@ export default function AdminRefundsPage() {
                                 size="sm"
                                 onClick={() => handleApprove(refund)}
                                 disabled={processing === refund.id}
-                                className="text-green-600 hover:text-green-700 h-8 w-8"
+                                className="text-green-600 hover:text-green-700 h-10 w-10"
                               >
-                                <CheckCircle className="h-4 w-4" />
+                                <CheckCircle className="h-6 w-6" />
                               </Button>
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleReject(refund)}
                                 disabled={processing === refund.id}
-                                className="text-red-600 hover:text-red-700 h-8 w-8"
+                                className="text-red-600 hover:text-red-700 h-10 w-10"
                               >
-                                <XCircle className="h-4 w-4" />
+                                <XCircle className="h-6 w-6" />
                               </Button>
                             </>
                           )}

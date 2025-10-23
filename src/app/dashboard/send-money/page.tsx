@@ -270,15 +270,16 @@ export default function SendMoneyPage() {
       }
 
       // 2. Create transaction record
-      const { error: txnError } = await supabase.from('transactions').insert({
+      const transactionData = {
         user_id: user.id,
         account_id: fromAccountId,
+        transaction_type: 'transfer',
+        direction: 'debit',
         amount: parseFloat(amount),
-        type: 'debit',
-        category: 'transfer',
-        status: 'completed',
+        currency: 'USD',
+        status: 'posted',
         description: `Sent to ${recipientName} at ${bankName}`,
-        reference_number: `EXT-${Date.now()}`,
+        reference: `EXT-${Date.now()}`,
         metadata: {
           recipient_name: recipientName,
           bank_name: bankName,
@@ -286,11 +287,52 @@ export default function SendMoneyPage() {
           account_number_masked: `****${accountNumber.slice(-4)}`,
           memo: memo,
         },
+      };
+
+      console.log(
+        '🔍 [SEND MONEY] Creating transaction with data:',
+        transactionData
+      );
+      console.log('🔍 [SEND MONEY] User ID:', user.id);
+      console.log('🔍 [SEND MONEY] Account ID:', fromAccountId);
+      console.log('🔍 [SEND MONEY] Amount:', parseFloat(amount));
+      console.log('🔍 [SEND MONEY] Reference:', `EXT-${Date.now()}`);
+
+      const { data: insertData, error: txnError } = await supabase
+        .from('transactions')
+        .insert(transactionData);
+
+      console.log('🔍 [SEND MONEY] Transaction insert result:', {
+        insertData,
+        txnError,
       });
 
       if (txnError) {
-        console.error('Transaction error:', txnError);
+        console.error('❌ [SEND MONEY] Transaction error details:', txnError);
+        console.error('❌ [SEND MONEY] Error code:', txnError.code);
+        console.error('❌ [SEND MONEY] Error message:', txnError.message);
+        console.error('❌ [SEND MONEY] Error details:', txnError.details);
+        console.error('❌ [SEND MONEY] Error hint:', txnError.hint);
+        console.error(
+          '❌ [SEND MONEY] Full error object:',
+          JSON.stringify(txnError, null, 2)
+        );
+
+        toast({
+          title: 'Transfer failed',
+          description: `Could not create transaction record: ${
+            txnError.message || 'Unknown error'
+          }`,
+          variant: 'destructive',
+        });
+        setSending(false);
+        return;
       }
+
+      console.log(
+        '✅ [SEND MONEY] Transaction created successfully:',
+        insertData
+      );
 
       // 3. Create alert
       await supabase.from('alerts').insert({

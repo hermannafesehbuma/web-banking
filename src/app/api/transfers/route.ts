@@ -125,42 +125,91 @@ export async function POST(request: NextRequest) {
     const reference = `TXN-${Date.now()}`;
 
     // 3. Create debit transaction
-    await supabase.from('transactions').insert({
+    const debitTransactionData = {
       user_id: user.id,
       account_id: from_account_id,
-      type: 'debit',
-      category: 'transfer',
+      transaction_type: 'transfer',
+      direction: 'debit',
       amount: amount,
-      status: 'completed',
+      currency: 'USD',
+      status: 'posted',
       description:
         description || `Transfer to ${toAccount.account_type} account`,
-      reference_number: reference,
+      reference: reference,
       balance_after: newFromBalance,
       metadata: {
         from_account_type: fromAccount.account_type,
         to_account_type: toAccount.account_type,
         transfer_type: 'internal',
       },
-    });
+    };
+
+    console.log(
+      '🔍 [API TRANSFERS] Creating debit transaction:',
+      debitTransactionData
+    );
+
+    const { data: debitData, error: debitError } = await supabase
+      .from('transactions')
+      .insert(debitTransactionData);
+
+    if (debitError) {
+      console.error('❌ [API TRANSFERS] Debit transaction error:', debitError);
+      console.error(
+        '❌ [API TRANSFERS] Error details:',
+        JSON.stringify(debitError, null, 2)
+      );
+      throw new Error(
+        `Failed to create debit transaction: ${debitError.message}`
+      );
+    }
+
+    console.log('✅ [API TRANSFERS] Debit transaction created:', debitData);
 
     // 4. Create credit transaction
-    await supabase.from('transactions').insert({
+    const creditTransactionData = {
       user_id: user.id,
       account_id: to_account_id,
-      type: 'credit',
-      category: 'transfer',
+      transaction_type: 'transfer',
+      direction: 'credit',
       amount: amount,
-      status: 'completed',
+      currency: 'USD',
+      status: 'posted',
       description:
         description || `Transfer from ${fromAccount.account_type} account`,
-      reference_number: reference,
+      reference: reference,
       balance_after: newToBalance,
       metadata: {
         from_account_type: fromAccount.account_type,
         to_account_type: toAccount.account_type,
         transfer_type: 'internal',
       },
-    });
+    };
+
+    console.log(
+      '🔍 [API TRANSFERS] Creating credit transaction:',
+      creditTransactionData
+    );
+
+    const { data: creditData, error: creditError } = await supabase
+      .from('transactions')
+      .insert(creditTransactionData);
+
+    if (creditError) {
+      console.error(
+        '❌ [API TRANSFERS] Credit transaction error:',
+        creditError
+      );
+      console.error(
+        '❌ [API TRANSFERS] Error details:',
+        JSON.stringify(creditError, null, 2)
+      );
+      throw new Error(
+        `Failed to create credit transaction: ${creditError.message}`
+      );
+    }
+
+    console.log('✅ [API TRANSFERS] Credit transaction created:', creditData);
 
     // 5. Create alert
     await supabase.from('alerts').insert({

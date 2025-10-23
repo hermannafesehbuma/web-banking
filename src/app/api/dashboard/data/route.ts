@@ -53,10 +53,12 @@ export async function GET(request: NextRequest) {
       // Recent Transactions
       supabase
         .from('transactions')
-        .select('id, amount, type, description, created_at, category')
+        .select(
+          'id, amount, direction, transaction_type, description, created_at, status, reference, balance_after, metadata'
+        )
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(10),
+        .limit(5),
 
       // Monthly Summaries
       supabase

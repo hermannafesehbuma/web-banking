@@ -38,7 +38,9 @@ export async function GET(request: NextRequest) {
     // Fetch transactions
     const { data: transactions, error } = await supabase
       .from('transactions')
-      .select('id, amount, type, description, created_at, category')
+      .select(
+        'id, amount, direction, transaction_type, description, created_at, status, reference, balance_after, metadata'
+      )
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(limit);

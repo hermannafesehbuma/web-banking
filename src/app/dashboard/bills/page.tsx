@@ -186,15 +186,16 @@ export default function BillsPage() {
 
       // 2. Create transaction record
       const reference = `BILL-${Date.now()}`;
-      const { error: txnError } = await supabase.from('transactions').insert({
+      const transactionData = {
         user_id: user.id,
         account_id: fromAccountId,
-        type: 'debit',
-        category: 'bills_utilities',
+        transaction_type: 'payment',
+        direction: 'debit',
         amount: parseFloat(amount),
-        status: 'completed',
+        currency: 'USD',
+        status: 'posted',
         description: `Bill payment to ${payeeName}`,
-        reference_number: reference,
+        reference: reference,
         balance_after: newBalance,
         metadata: {
           payee_name: payeeName,
@@ -203,18 +204,49 @@ export default function BillsPage() {
           due_date: dueDate,
           memo: memo,
         },
+      };
+
+      console.log(
+        '🔍 [BILLS] Creating transaction with data:',
+        transactionData
+      );
+      console.log('🔍 [BILLS] User ID:', user.id);
+      console.log('🔍 [BILLS] Account ID:', fromAccountId);
+      console.log('🔍 [BILLS] Amount:', parseFloat(amount));
+      console.log('🔍 [BILLS] Reference:', reference);
+
+      const { data: insertData, error: txnError } = await supabase
+        .from('transactions')
+        .insert(transactionData);
+
+      console.log('🔍 [BILLS] Transaction insert result:', {
+        insertData,
+        txnError,
       });
 
       if (txnError) {
-        console.error('Transaction error:', txnError);
+        console.error('❌ [BILLS] Transaction error details:', txnError);
+        console.error('❌ [BILLS] Error code:', txnError.code);
+        console.error('❌ [BILLS] Error message:', txnError.message);
+        console.error('❌ [BILLS] Error details:', txnError.details);
+        console.error('❌ [BILLS] Error hint:', txnError.hint);
+        console.error(
+          '❌ [BILLS] Full error object:',
+          JSON.stringify(txnError, null, 2)
+        );
+
         toast({
           title: 'Payment failed',
-          description: 'Could not create transaction record.',
+          description: `Could not create transaction record: ${
+            txnError.message || 'Unknown error'
+          }`,
           variant: 'destructive',
         });
         setPaying(false);
         return;
       }
+
+      console.log('✅ [BILLS] Transaction created successfully:', insertData);
 
       // 3. Send email confirmation
       try {

@@ -41,9 +41,9 @@ export async function GET(request: NextRequest) {
     // Fetch spending by category (current month)
     const { data: categoryData, error } = await supabase
       .from('transactions')
-      .select('category, amount')
+      .select('transaction_type, amount, metadata')
       .eq('user_id', user.id)
-      .eq('type', 'debit')
+      .eq('direction', 'debit')
       .gte('created_at', currentMonthStart);
 
     if (error) {
@@ -54,28 +54,46 @@ export async function GET(request: NextRequest) {
     // Aggregate by category
     const categoryMap: { [key: string]: number } = {};
     const categoryColors: { [key: string]: string } = {
-      food_dining: '#0088FE',
-      transportation: '#00C49F',
-      shopping: '#FFBB28',
-      bills_utilities: '#FF8042',
-      entertainment: '#8884d8',
-      healthcare: '#FF6B9D',
-      education: '#AA66CC',
-      other: '#999999',
+      'Bill Payments': '#FF8042', // Orange for bill payments
+      'Money Transfers': '#0088FE', // Blue for transfers
+      Fees: '#FF6B9D', // Pink for fees
+      Withdrawals: '#8884d8', // Purple for withdrawals
+      'Other Expenses': '#999999', // Gray for other
     };
 
     (categoryData || []).forEach(
-      (txn: { category: string; amount: number }) => {
-        const cat = txn.category || 'other';
+      (txn: { transaction_type: string; amount: number; metadata: any }) => {
+        let cat = 'Other Expenses'; // Default category
+
+        // Categorize based on transaction type
+        switch (txn.transaction_type) {
+          case 'payment':
+            // Bill payments - try to get specific category from metadata
+            if (txn.metadata?.payee_category) {
+              cat = txn.metadata.payee_category;
+            } else {
+              cat = 'Bill Payments';
+            }
+            break;
+          case 'transfer':
+            cat = 'Money Transfers';
+            break;
+          case 'fee':
+            cat = 'Fees';
+            break;
+          case 'withdrawal':
+            cat = 'Withdrawals';
+            break;
+          default:
+            cat = 'Other Expenses';
+        }
+
         categoryMap[cat] = (categoryMap[cat] || 0) + Math.abs(txn.amount);
       }
     );
 
     const spending = Object.entries(categoryMap).map(([key, value]) => ({
-      name: key
-        .split('_')
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' '),
+      name: key,
       value: Math.round(value),
       color: categoryColors[key] || '#999999',
     }));

@@ -534,7 +534,7 @@ export const emailTemplates = {
               <p><strong>Reference ID:</strong> ${refundId}</p>
             </div>
             ${
-              status === 'completed'
+              status === 'posted'
                 ? '<p>The refund has been processed and the funds have been credited to your account.</p>'
                 : status === 'rejected'
                 ? '<p>Unfortunately, your refund request was not approved. Please contact support if you have questions.</p>'

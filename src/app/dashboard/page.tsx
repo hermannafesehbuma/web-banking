@@ -52,11 +52,13 @@ type Account = {
 type Transaction = {
   id: string;
   amount: number;
-  type: 'credit' | 'debit' | 'refund';
+  direction: 'credit' | 'debit';
+  transaction_type: string;
   description: string;
   created_at: string;
   balance_after?: number;
-  category?: string;
+  status: string;
+  reference: string;
 };
 
 type SpendingCategory = {
@@ -105,6 +107,9 @@ export default function DashboardPage() {
   const [spendingByCategory, setSpendingByCategory] = useState<
     SpendingCategory[]
   >([]);
+  const [totalIncome, setTotalIncome] = useState(0);
+  const [totalExpenses, setTotalExpenses] = useState(0);
+  const [netIncome, setNetIncome] = useState(0);
   const [monthlyTrend, setMonthlyTrend] = useState<MonthlyData[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [savingsGoal, setSavingsGoal] = useState<SavingsGoal | null>(null);
@@ -281,18 +286,24 @@ export default function DashboardPage() {
           setMonthlyTrend(dashboardData.summaries);
         }
 
-        // Fetch spending data separately
-        console.log('🔄 Calling API /api/dashboard/spending');
-        const spendingResponse = await fetch('/api/dashboard/spending', {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
+        // Fetch income/expense data
+        console.log('🔄 Calling API /api/dashboard/income-expense');
+        const incomeExpenseResponse = await fetch(
+          '/api/dashboard/income-expense',
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
 
-        if (spendingResponse.ok) {
-          const spendingData = await spendingResponse.json();
-          console.log('💰 SPENDING DATA:', spendingData.spending);
-          setSpendingByCategory(spendingData.spending || []);
+        if (incomeExpenseResponse.ok) {
+          const incomeExpenseData = await incomeExpenseResponse.json();
+          console.log('💰 INCOME/EXPENSE DATA:', incomeExpenseData);
+          setSpendingByCategory(incomeExpenseData.expenseCategories || []);
+          setTotalIncome(incomeExpenseData.totalIncome || 0);
+          setTotalExpenses(incomeExpenseData.totalExpenses || 0);
+          setNetIncome(incomeExpenseData.netIncome || 0);
         }
 
         // Fetch pending refunds (not cancelled, failed, or completed)
@@ -301,15 +312,20 @@ export default function DashboardPage() {
           .from('refunds')
           .select('amount_cents, status')
           .eq('user_id', user.id)
-          .not('status', 'in', '("cancelled","failed","completed")');
+          .in('status', ['pending', 'approved']);
 
         if (refundsError) {
           console.error('❌ Error fetching refunds:', refundsError);
+          console.error(
+            '❌ Refunds error details:',
+            JSON.stringify(refundsError, null, 2)
+          );
         } else {
           const pendingAmount =
             (refunds || []).reduce((sum, r) => sum + r.amount_cents, 0) / 100;
           console.log('💵 PENDING REFUNDS:', refunds);
           console.log('💵 TOTAL PENDING AMOUNT:', pendingAmount);
+          console.log('💵 Refunds count:', (refunds || []).length);
           setPendingRefundsAmount(pendingAmount);
         }
 
@@ -599,12 +615,12 @@ export default function DashboardPage() {
                         <div className="flex items-center gap-3">
                           <div
                             className={`h-8 w-8 rounded-full flex items-center justify-center ${
-                              txn.type === 'credit'
+                              txn.direction === 'credit'
                                 ? 'bg-green-100 dark:bg-green-900/20'
                                 : 'bg-red-100 dark:bg-red-900/20'
                             }`}
                           >
-                            {txn.type === 'credit' ? (
+                            {txn.direction === 'credit' ? (
                               <ArrowDownRight className="h-4 w-4 text-green-600" />
                             ) : (
                               <ArrowUpRight className="h-4 w-4 text-red-600" />
@@ -616,18 +632,18 @@ export default function DashboardPage() {
                             </div>
                             <div className="text-xs text-muted-foreground">
                               {new Date(txn.created_at).toLocaleDateString()} •{' '}
-                              {txn.category || 'General'}
+                              {txn.transaction_type || 'General'}
                             </div>
                           </div>
                         </div>
                         <div
                           className={`text-sm font-semibold ${
-                            txn.type === 'credit'
+                            txn.direction === 'credit'
                               ? 'text-green-600'
                               : 'text-red-600'
                           }`}
                         >
-                          {txn.type === 'credit' ? '+' : '-'}$
+                          {txn.direction === 'credit' ? '+' : '-'}$
                           {Math.abs(txn.amount).toFixed(2)}
                         </div>
                       </div>
@@ -640,9 +656,10 @@ export default function DashboardPage() {
             {/* 3. Spending Analytics */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Spending Analytics</CardTitle>
+                <CardTitle className="text-base">Expense Breakdown</CardTitle>
                 <CardDescription>
-                  Your spending breakdown this month
+                  Your expense categories this month (Bill payments, transfers,
+                  etc.)
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-0">
@@ -723,6 +740,121 @@ export default function DashboardPage() {
                       />
                     </LineChart>
                   </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Current Month Income vs Expenses */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">
+                  This Month's Summary
+                </CardTitle>
+                <CardDescription>
+                  Income vs Expenses for{' '}
+                  {new Date().toLocaleDateString('en-US', {
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <p className="text-sm text-green-600 dark:text-green-400 font-medium">
+                      Total Income
+                    </p>
+                    <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                      ${totalIncome.toFixed(2)}
+                    </p>
+                  </div>
+                  <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                    <p className="text-sm text-red-600 dark:text-red-400 font-medium">
+                      Total Expenses
+                    </p>
+                    <p className="text-2xl font-bold text-red-700 dark:text-red-300">
+                      ${totalExpenses.toFixed(2)}
+                    </p>
+                  </div>
+                  <div
+                    className={`text-center p-4 rounded-lg ${
+                      netIncome >= 0
+                        ? 'bg-green-50 dark:bg-green-900/20'
+                        : 'bg-red-50 dark:bg-red-900/20'
+                    }`}
+                  >
+                    <p
+                      className={`text-sm font-medium ${
+                        netIncome >= 0
+                          ? 'text-green-600 dark:text-green-400'
+                          : 'text-red-600 dark:text-red-400'
+                      }`}
+                    >
+                      Net Income
+                    </p>
+                    <p
+                      className={`text-2xl font-bold ${
+                        netIncome >= 0
+                          ? 'text-green-700 dark:text-green-300'
+                          : 'text-red-700 dark:text-red-300'
+                      }`}
+                    >
+                      ${netIncome.toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Simple bar chart for income vs expenses */}
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">
+                    Income vs Expenses Breakdown
+                  </p>
+                  <div className="space-y-2">
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span>Income</span>
+                        <span>${totalIncome.toFixed(2)}</span>
+                      </div>
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div
+                          className="bg-green-500 h-2 rounded-full"
+                          style={{
+                            width:
+                              totalIncome > 0
+                                ? `${Math.min(
+                                    (totalIncome /
+                                      Math.max(totalIncome, totalExpenses)) *
+                                      100,
+                                    100
+                                  )}%`
+                                : '0%',
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span>Expenses</span>
+                        <span>${totalExpenses.toFixed(2)}</span>
+                      </div>
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div
+                          className="bg-red-500 h-2 rounded-full"
+                          style={{
+                            width:
+                              totalExpenses > 0
+                                ? `${Math.min(
+                                    (totalExpenses /
+                                      Math.max(totalIncome, totalExpenses)) *
+                                      100,
+                                    100
+                                  )}%`
+                                : '0%',
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
