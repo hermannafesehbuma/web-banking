@@ -1,3 +1,5 @@
+'use client';
+
 import { Badge } from '@/components/ui/badge';
 import {
   Card,
@@ -7,14 +9,11 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-
-export const metadata = {
-  title: 'Compare Accounts — Fortiz Bank',
-  description: 'Compare Fortiz checking and savings accounts side by side.',
-};
+import { PageTransition } from '@/components/PageTransition';
 
 export default function CompareAccountsPage() {
   return (
+    <PageTransition>
     <div className="mx-auto w-full max-w-6xl px-6 py-16 md:py-20">
       <section>
         <Badge className="mb-4">Accounts</Badge>
@@ -65,5 +64,6 @@ export default function CompareAccountsPage() {
         </Card>
       </section>
     </div>
+    </PageTransition>
   );
 }

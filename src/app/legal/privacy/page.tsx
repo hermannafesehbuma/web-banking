@@ -1,10 +1,10 @@
-export const metadata = {
-  title: 'Privacy Policy — Fortiz Bank',
-  description: 'Fortiz Bank privacy policy and data protection practices.',
-};
+'use client';
+
+import { PageTransition } from '@/components/PageTransition';
 
 export default function PrivacyPage() {
   return (
+    <PageTransition>
     <div className="mx-auto w-full max-w-3xl px-6 py-16 md:py-20 prose prose-neutral dark:prose-invert">
       <h1>Privacy Policy</h1>
       <p>
@@ -166,5 +166,6 @@ export default function PrivacyPage() {
 
       <p className="text-sm text-muted-foreground">Last updated: Oct 2025</p>
     </div>
+    </PageTransition>
   );
 }

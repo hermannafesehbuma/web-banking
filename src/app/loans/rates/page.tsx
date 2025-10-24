@@ -1,3 +1,5 @@
+'use client';
+
 import { Badge } from '@/components/ui/badge';
 import {
   Card,
@@ -6,15 +8,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-
-export const metadata = {
-  title: 'Loan Rates — Fortiz Bank',
-  description:
-    'Transparent, competitive loan rates and terms from Fortiz Bank.',
-};
+import { PageTransition } from '@/components/PageTransition';
 
 export default function LoanRatesPage() {
   return (
+    <PageTransition>
     <div className="mx-auto w-full max-w-6xl px-6 py-16 md:py-20">
       <section>
         <Badge className="mb-4">Loans</Badge>
@@ -87,5 +85,6 @@ export default function LoanRatesPage() {
         </Card>
       </section>
     </div>
+    </PageTransition>
   );
 }

@@ -1,10 +1,10 @@
-export const metadata = {
-  title: 'Cookie Policy — Fortiz Bank',
-  description: 'Fortiz Bank cookie policy.',
-};
+'use client';
+
+import { PageTransition } from '@/components/PageTransition';
 
 export default function CookiePage() {
   return (
+    <PageTransition>
     <div className="mx-auto w-full max-w-3xl px-6 py-16 md:py-20 prose prose-neutral dark:prose-invert">
       <h1>Cookie Policy</h1>
       <p>
@@ -88,5 +88,6 @@ export default function CookiePage() {
 
       <p className="text-sm text-muted-foreground">Last updated: Oct 2025</p>
     </div>
+    </PageTransition>
   );
 }

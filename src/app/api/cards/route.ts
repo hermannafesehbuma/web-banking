@@ -159,29 +159,78 @@ export async function POST(request: NextRequest) {
 
     // Send email notification
     try {
-      const { data: userData } = await supabase
+      console.log('📧 Fetching user data for card request email...');
+
+      // Fetch user basic info from bank_users
+      const { data: userData, error: userError } = await supabase
         .from('bank_users')
-        .select('email, full_name, address')
+        .select('email, full_name')
         .eq('id', user.id)
         .single();
 
-      if (userData) {
-        await fetch(
-          `${process.env.NEXT_PUBLIC_APP_URL}/api/emails/card-request`,
+      if (userError) {
+        console.error('❌ Error fetching user data:', userError);
+      } else if (userData) {
+        console.log('📧 User data fetched:', {
+          email: userData.email,
+          name: userData.full_name,
+        });
+
+        // Fetch address from kyc_submissions (address is stored there, not in bank_users)
+        console.log('📧 Fetching address from kyc_submissions...');
+        const { data: kycData } = await supabase
+          .from('kyc_submissions')
+          .select('address')
+          .eq('user_id', user.id)
+          .order('submitted_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        const deliveryAddress = kycData?.address || 'Your registered address';
+        console.log('📧 Delivery address:', deliveryAddress);
+
+        const emailPayload = {
+          email: userData.email,
+          userName: userData.full_name,
+          cardType: card_type,
+          deliveryAddress: deliveryAddress,
+        };
+
+        console.log(
+          '📧 Sending card request email with payload:',
+          emailPayload
+        );
+
+        // Use relative URL for internal API calls (works in Next.js)
+        const baseUrl =
+          process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        console.log('📧 Using base URL:', baseUrl);
+
+        const emailResponse = await fetch(
+          `${baseUrl}/api/emails/card-request`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email: userData.email,
-              userName: userData.full_name,
-              cardType: card_type,
-              deliveryAddress: userData.address || 'Your registered address',
-            }),
+            body: JSON.stringify(emailPayload),
           }
         );
+
+        if (!emailResponse.ok) {
+          const errorText = await emailResponse.text();
+          console.error('❌ Card request email API error:', {
+            status: emailResponse.status,
+            statusText: emailResponse.statusText,
+            error: errorText,
+          });
+        } else {
+          const responseData = await emailResponse.json();
+          console.log('✅ Card request email sent successfully:', responseData);
+        }
+      } else {
+        console.error('❌ No user data found for email notification');
       }
     } catch (emailError) {
-      console.error('Failed to send card request email:', emailError);
+      console.error('❌ Failed to send card request email:', emailError);
     }
 
     return NextResponse.json({ card: newCard });

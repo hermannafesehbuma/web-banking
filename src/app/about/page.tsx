@@ -1,3 +1,5 @@
+'use client';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -20,17 +22,14 @@ import {
   Globe2,
   HandHeart,
 } from 'lucide-react';
-
-export const metadata = {
-  title: 'About Us — Fortiz Bank',
-  description:
-    'Learn about Fortiz Bank: our story, leadership, values, and security commitments.',
-};
+import { PageTransition, SlideUp, StaggerContainer, StaggerItem } from '@/components/PageTransition';
 
 export default function AboutPage() {
   return (
+    <PageTransition>
     <div className="mx-auto w-full max-w-6xl px-6 py-16 md:py-20">
       {/* Hero */}
+      <SlideUp>
       <section className="max-w-3xl">
         <Badge className="mb-4">About Fortiz Bank</Badge>
         <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
@@ -42,6 +41,7 @@ export default function AboutPage() {
           plan with confidence.
         </p>
       </section>
+      </SlideUp>
 
       {/* Our Journey / Timeline */}
       <section className="mt-12">
@@ -140,23 +140,23 @@ export default function AboutPage() {
             {
               name: 'Jordan Lee',
               role: 'Chief Executive Officer',
-              img: 'https://i.pravatar.cc/160?img=11',
+              img: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=faces',
               bio: 'Previously COO at a national bank. 15+ years leading customer-centric teams.',
-              link: '#',
+              link: '/about/team/jordan-lee',
             },
             {
               name: 'Samira Khan',
               role: 'Chief Technology Officer',
-              img: 'https://i.pravatar.cc/160?img=12',
+              img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&crop=faces',
               bio: 'Ex-FAANG engineering leader. Focused on reliability and developer velocity.',
-              link: '#',
+              link: '/about/team/samira-khan',
             },
             {
               name: 'Daniel Rossi',
               role: 'Chief Risk Officer',
-              img: 'https://i.pravatar.cc/160?img=13',
+              img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop&crop=faces',
               bio: 'Risk and compliance expert with deep fintech experience.',
-              link: '#',
+              link: '/about/team/daniel-rossi',
             },
           ].map((m) => (
             <Card key={m.name}>
@@ -406,5 +406,6 @@ export default function AboutPage() {
         </div>
       </section>
     </div>
+    </PageTransition>
   );
 }

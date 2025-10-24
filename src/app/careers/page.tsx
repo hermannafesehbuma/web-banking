@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Card,
   CardContent,
@@ -8,11 +10,7 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-
-export const metadata = {
-  title: 'Careers — Fortiz Bank',
-  description: 'Join Fortiz Bank. Help build the most trusted digital bank.',
-};
+import { PageTransition, SlideUp } from '@/components/PageTransition';
 
 const openings = [
   {
@@ -30,6 +28,7 @@ const openings = [
 
 export default function CareersPage() {
   return (
+    <PageTransition>
     <div className="mx-auto w-full max-w-6xl px-6 py-16 md:py-20">
       <section>
         <Badge className="mb-4">Careers</Badge>
@@ -86,5 +85,6 @@ export default function CareersPage() {
         </div>
       </section>
     </div>
+    </PageTransition>
   );
 }

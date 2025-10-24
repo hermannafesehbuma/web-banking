@@ -1,3 +1,5 @@
+'use client';
+
 import { Badge } from '@/components/ui/badge';
 import {
   Card,
@@ -6,15 +8,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-
-export const metadata = {
-  title: 'Customer Story: Saving for a First Home — Fortiz Bank',
-  description:
-    'How automated savings and insights helped reach a big goal sooner.',
-};
+import { PageTransition } from '@/components/PageTransition';
 
 export default function StoryFirstHomePage() {
   return (
+    <PageTransition>
     <div className="mx-auto w-full max-w-3xl px-6 py-16 md:py-20">
       <Badge className="mb-4">Customer story</Badge>
       <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
@@ -76,5 +74,6 @@ export default function StoryFirstHomePage() {
         </p>
       </div>
     </div>
+    </PageTransition>
   );
 }

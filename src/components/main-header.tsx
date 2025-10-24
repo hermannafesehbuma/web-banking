@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { useState } from 'react';
+import { Menu, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UserMenu } from '@/components/UserMenu';
-import { cn } from '@/lib/utils';
+import { MainNavMobile } from '@/components/main-nav-mobile';
+import { useAuth } from '@/contexts/AuthContext';
 
 const navigationItems = [
   {
@@ -24,8 +24,8 @@ const navigationItems = [
     submenu: [
       { name: 'All Services', href: '/services' },
       { name: 'Online Banking', href: '/services' },
-      { name: 'Mobile App', href: '/services' },
-      { name: 'Card Services', href: '/services' },
+      { name: 'Mobile App', href: '/mobile-app' },
+      { name: 'Card Services', href: '/services/cards' },
     ],
   },
   {
@@ -33,6 +33,7 @@ const navigationItems = [
     href: '/about',
     submenu: [
       { name: 'About Us', href: '/about' },
+      { name: 'Branch Locations', href: '/about/branches' },
       { name: 'Testimonials', href: '/testimonials' },
       { name: 'Careers', href: '/careers' },
       { name: 'Customer Stories', href: '/' },
@@ -49,34 +50,11 @@ const navigationItems = [
 ];
 
 export function MainHeader() {
-  const pathname = usePathname();
+  const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
-
-  // Close mobile menu on navigation
-  useEffect(() => {
-    setMobileMenuOpen(false);
-    setOpenSubmenu(null);
-  }, [pathname]);
-
-  // Prevent body scroll when mobile menu is open
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [mobileMenuOpen]);
-
-  const toggleSubmenu = (name: string) => {
-    setOpenSubmenu(openSubmenu === name ? null : name);
-  };
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 border-b bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -141,100 +119,43 @@ export function MainHeader() {
 
           {/* Right Side */}
           <div className="flex items-center gap-3">
-            {/* User Menu (always visible) */}
-            <UserMenu />
+            {/* Desktop: Show auth buttons when logged out */}
+            {!user && (
+              <div className="hidden md:flex items-center gap-2">
+                <Link href="/auth/login">
+                  <Button variant="ghost" size="sm">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/open-account">
+                  <Button size="sm">Open Account</Button>
+                </Link>
+              </div>
+            )}
+
+            {/* User Menu (only when logged in) */}
+            {user && <UserMenu />}
 
             {/* Mobile Menu Button */}
             <Button
               variant="ghost"
               size="sm"
               className="md:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Open mobile menu"
             >
-              {mobileMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
+              <Menu className="h-5 w-5" />
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu Overlay */}
-      {mobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
-          style={{ top: '64px' }}
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
-
-      {/* Mobile Menu Drawer */}
-      <div
-        className={cn(
-          'fixed left-0 w-80 bg-background border-r z-50 transform transition-transform duration-300 ease-in-out md:hidden overflow-y-auto shadow-xl',
-          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-        )}
-        style={{ top: '64px', bottom: 0 }}
-      >
-        <nav className="flex flex-col p-4 space-y-1">
-          {navigationItems.map((item) => (
-            <div key={item.name}>
-              {item.href && !item.submenu ? (
-                <Link href={item.href}>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start text-base"
-                  >
-                    {item.name}
-                  </Button>
-                </Link>
-              ) : (
-                <>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-between text-base"
-                    onClick={() => toggleSubmenu(item.name)}
-                  >
-                    {item.name}
-                    <ChevronDown
-                      className={cn(
-                        'h-4 w-4 transition-transform',
-                        openSubmenu === item.name && 'rotate-180'
-                      )}
-                    />
-                  </Button>
-
-                  {/* Mobile Submenu */}
-                  {item.submenu && openSubmenu === item.name && (
-                    <div className="ml-4 mt-1 space-y-1">
-                      {item.submenu.map((subItem) => (
-                        <Link key={subItem.name} href={subItem.href}>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="w-full justify-start text-sm text-muted-foreground"
-                          >
-                            {subItem.name}
-                          </Button>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          ))}
-
-          {/* Mobile: Add direct links */}
-          <div className="pt-4 border-t mt-4">
-            <Link href="/open-account">
-              <Button className="w-full mb-2">Open Account</Button>
-            </Link>
-          </div>
-        </nav>
-      </div>
+      {/* Mobile Navigation Menu */}
+      <MainNavMobile
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        isLoggedIn={!!user}
+      />
     </header>
   );
 }

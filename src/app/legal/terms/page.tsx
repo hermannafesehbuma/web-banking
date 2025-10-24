@@ -1,10 +1,10 @@
-export const metadata = {
-  title: 'Terms & Conditions — Fortiz Bank',
-  description: 'Fortiz Bank terms and conditions.',
-};
+'use client';
+
+import { PageTransition } from '@/components/PageTransition';
 
 export default function TermsPage() {
   return (
+    <PageTransition>
     <div className="mx-auto w-full max-w-3xl px-6 py-16 md:py-20 prose prose-neutral dark:prose-invert">
       <h1>Terms & Conditions</h1>
       <p>
@@ -130,5 +130,6 @@ export default function TermsPage() {
 
       <p className="text-sm text-muted-foreground">Effective: Oct 2025</p>
     </div>
+    </PageTransition>
   );
 }

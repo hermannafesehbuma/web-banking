@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Accordion,
   AccordionContent,
@@ -5,15 +7,11 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-
-export const metadata = {
-  title: 'FAQ — Fortiz Bank',
-  description:
-    'Frequently asked questions about Fortiz Bank accounts, refunds, and security.',
-};
+import { PageTransition, SlideUp } from '@/components/PageTransition';
 
 export default function FaqPage() {
   return (
+    <PageTransition>
     <div className="mx-auto w-full max-w-3xl px-6 py-16 md:py-20">
       <section>
         <Badge className="mb-4">FAQ</Badge>
@@ -112,5 +110,6 @@ export default function FaqPage() {
         </Accordion>
       </section>
     </div>
+    </PageTransition>
   );
 }

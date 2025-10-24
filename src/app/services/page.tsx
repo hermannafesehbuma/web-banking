@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Card,
   CardContent,
@@ -14,15 +16,11 @@ import {
   Landmark,
   Wallet,
 } from 'lucide-react';
-
-export const metadata = {
-  title: 'Services — Fortiz Bank',
-  description:
-    'Explore Fortiz Bank products: checking, savings, loans, and payments.',
-};
+import { PageTransition, SlideUp } from '@/components/PageTransition';
 
 export default function ServicesPage() {
   return (
+    <PageTransition>
     <div className="mx-auto w-full max-w-6xl px-6 py-16 md:py-20">
       <section>
         <Badge className="mb-4">Our Products</Badge>
@@ -117,5 +115,6 @@ export default function ServicesPage() {
         </Card>
       </section>
     </div>
+    </PageTransition>
   );
 }

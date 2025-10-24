@@ -1,3 +1,5 @@
+'use client';
+
 import { Badge } from '@/components/ui/badge';
 import {
   Card,
@@ -6,14 +8,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-
-export const metadata = {
-  title: 'Customer Story: Growing a Small Business — Fortiz Bank',
-  description: 'How Park & Co. scaled with Fortiz business banking.',
-};
+import { PageTransition } from '@/components/PageTransition';
 
 export default function StorySmallBusinessPage() {
   return (
+    <PageTransition>
     <div className="mx-auto w-full max-w-3xl px-6 py-16 md:py-20">
       <Badge className="mb-4">Customer story</Badge>
       <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
@@ -78,5 +77,6 @@ export default function StorySmallBusinessPage() {
         </p>
       </div>
     </div>
+    </PageTransition>
   );
 }

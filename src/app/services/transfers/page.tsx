@@ -1,3 +1,5 @@
+'use client';
+
 import { Badge } from '@/components/ui/badge';
 import {
   Card,
@@ -6,14 +8,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-
-export const metadata = {
-  title: 'Instant Transfers — Fortiz Bank',
-  description: 'Send and receive money in seconds with Fortiz transfers.',
-};
+import { PageTransition } from '@/components/PageTransition';
 
 export default function TransfersPage() {
   return (
+    <PageTransition>
     <div className="mx-auto w-full max-w-6xl px-6 py-16 md:py-20">
       <section>
         <Badge className="mb-4">Transfers</Badge>
@@ -59,5 +58,6 @@ export default function TransfersPage() {
         </Card>
       </section>
     </div>
+    </PageTransition>
   );
 }

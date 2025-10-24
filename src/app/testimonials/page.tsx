@@ -1,5 +1,8 @@
+'use client';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Star } from 'lucide-react';
+import { PageTransition, SlideUp, StaggerContainer, StaggerItem } from '@/components/PageTransition';
 
 const testimonials = [
   {
@@ -215,6 +218,7 @@ const testimonials = [
 
 export default function TestimonialsPage() {
   return (
+    <PageTransition>
     <div className="container mx-auto max-w-6xl py-12 px-4">
       <div className="mb-12 text-center">
         <h1 className="text-4xl font-bold tracking-tight mb-4">
@@ -281,5 +285,6 @@ export default function TestimonialsPage() {
         </Card>
       </div>
     </div>
+    </PageTransition>
   );
 }
