@@ -46,47 +46,135 @@ export async function sendEmail({ to, subject, html }: EmailOptions) {
   }
 }
 
+// Email Template Helper Functions
+const getEmailHeader = () => `
+  <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 40px 30px; text-align: center;">
+    <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: 700; letter-spacing: 2px;">
+      FORTIZ BANK
+    </h1>
+    <p style="margin: 8px 0 0 0; color: #e5e7eb; font-size: 14px; letter-spacing: 1px;">
+      Banking Made Simple
+    </p>
+  </div>
+`;
+
+const getEmailFooter = () => `
+  <div style="background: #f9fafb; padding: 30px; border-top: 1px solid #e5e7eb; margin-top: 40px;">
+    <div style="text-align: center; margin-bottom: 20px;">
+      <h3 style="margin: 0 0 10px 0; color: #1f2937; font-size: 18px;">Need Assistance?</h3>
+      <p style="margin: 5px 0; color: #6b7280; font-size: 14px;">
+        Our customer support team is available 24/7 to help you.
+      </p>
+      <p style="margin: 10px 0;">
+        <strong style="color: #1f2937;">Email:</strong> 
+        <a href="mailto:contact@fortizb.com" style="color: #2563eb; text-decoration: none;">contact@fortizb.com</a>
+      </p>
+      <p style="margin: 5px 0;">
+        <strong style="color: #1f2937;">Phone:</strong> 
+        <span style="color: #6b7280;">1-800-FORTIZ-B (1-800-367-8492)</span>
+      </p>
+    </div>
+    
+    <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 20px;">
+      <p style="text-align: center; color: #9ca3af; font-size: 12px; line-height: 1.6; margin: 10px 0;">
+        This is an automated message from Fortiz Bank. Please do not reply directly to this email.
+      </p>
+      <p style="text-align: center; color: #9ca3af; font-size: 12px; margin: 10px 0;">
+        &copy; ${new Date().getFullYear()} Fortiz Bank. All rights reserved. Member FDIC.
+      </p>
+    </div>
+  </div>
+`;
+
+const getButtonStyle = () =>
+  'display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #1f2937 0%, #374151 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; text-align: center;';
+
 // Email Templates
 
 export const emailTemplates = {
   // 1. Welcome Email (Account Created)
   welcomeEmail: (userName: string, userEmail: string) => ({
-    subject: 'Welcome to Fortiz Bank! 🎉',
+    subject: 'Welcome to Fortiz Bank - Your Account is Ready',
     html: `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: #000; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #fff; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb; }
-          .button { display: inline-block; padding: 12px 24px; background: #000; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0; }
-          .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #6b7280; }
-        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
       </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>Welcome to Fortiz Bank!</h1>
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          ${getEmailHeader()}
+          
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #1f2937; font-size: 24px; margin: 0 0 20px 0;">Dear ${userName},</h2>
+            
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+              Welcome to Fortiz Bank! We are thrilled to have you join our banking family. Your account has been successfully created and you're now part of a financial institution committed to making banking simple, secure, and accessible.
+            </p>
+            
+            <div style="background: #f0f9ff; border-left: 4px solid #0284c7; padding: 20px; margin: 25px 0; border-radius: 6px;">
+              <h3 style="color: #075985; font-size: 18px; margin: 0 0 10px 0;">📧 Account Information</h3>
+              <p style="color: #0c4a6e; font-size: 15px; margin: 5px 0;">
+                <strong>Email:</strong> ${userEmail}
+              </p>
+              <p style="color: #0c4a6e; font-size: 15px; margin: 5px 0;">
+                <strong>Status:</strong> Active
+              </p>
           </div>
-          <div class="content">
-            <h2>Hi ${userName},</h2>
-            <p>Thank you for choosing Fortiz Bank! Your account has been successfully created.</p>
-            <p><strong>Email:</strong> ${userEmail}</p>
-            <p>Next steps:</p>
-            <ol>
-              <li>Complete your KYC verification to unlock all features</li>
-              <li>Set up your checking and savings accounts</li>
-              <li>Start managing your finances with ease</li>
-            </ol>
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" class="button">Go to Dashboard</a>
-            <p>If you have any questions, our support team is here to help!</p>
+            
+            <h3 style="color: #1f2937; font-size: 20px; margin: 30px 0 15px 0;">Next Steps to Get Started</h3>
+            
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <div style="display: table; width: 100%; margin-bottom: 15px;">
+                <div style="display: table-cell; width: 40px; vertical-align: top;">
+                  <div style="width: 32px; height: 32px; background: #0284c7; color: white; border-radius: 50%; text-align: center; line-height: 32px; font-weight: bold;">1</div>
           </div>
-          <div class="footer">
-            <p>&copy; 2025 Fortiz Bank. All rights reserved.</p>
+                <div style="display: table-cell; vertical-align: top; padding-left: 15px;">
+                  <h4 style="color: #1f2937; font-size: 16px; margin: 0 0 5px 0;">Complete Your KYC Verification</h4>
+                  <p style="color: #6b7280; font-size: 14px; margin: 0;">Verify your identity to unlock all banking features and ensure account security.</p>
           </div>
+              </div>
+              
+              <div style="display: table; width: 100%; margin-bottom: 15px;">
+                <div style="display: table-cell; width: 40px; vertical-align: top;">
+                  <div style="width: 32px; height: 32px; background: #0284c7; color: white; border-radius: 50%; text-align: center; line-height: 32px; font-weight: bold;">2</div>
+                </div>
+                <div style="display: table-cell; vertical-align: top; padding-left: 15px;">
+                  <h4 style="color: #1f2937; font-size: 16px; margin: 0 0 5px 0;">Set Up Your Accounts</h4>
+                  <p style="color: #6b7280; font-size: 14px; margin: 0;">Once verified, your checking and savings accounts will be automatically created.</p>
+                </div>
+              </div>
+              
+              <div style="display: table; width: 100%;">
+                <div style="display: table-cell; width: 40px; vertical-align: top;">
+                  <div style="width: 32px; height: 32px; background: #0284c7; color: white; border-radius: 50%; text-align: center; line-height: 32px; font-weight: bold;">3</div>
+                </div>
+                <div style="display: table-cell; vertical-align: top; padding-left: 15px;">
+                  <h4 style="color: #1f2937; font-size: 16px; margin: 0 0 5px 0;">Start Banking</h4>
+                  <p style="color: #6b7280; font-size: 14px; margin: 0;">Explore transfers, bill payments, cards, and all our banking services.</p>
+                </div>
+              </div>
+            </div>
+            
+            <div style="text-align: center; margin: 35px 0;">
+              <a href="https://www.fortizb.com/dashboard" style="${getButtonStyle()}">Access Your Dashboard</a>
+            </div>
+            
+            <div style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 6px; padding: 20px; margin: 30px 0;">
+              <h4 style="color: #92400e; font-size: 16px; margin: 0 0 10px 0;">🔒 Security Reminder</h4>
+              <p style="color: #78350f; font-size: 14px; line-height: 1.6; margin: 0;">
+                Fortiz Bank will never ask for your password via email or phone. Always verify you're on our official website (www.fortizb.com) when logging in.
+              </p>
+            </div>
+            
+            <p style="color: #4b5563; font-size: 15px; margin: 20px 0 0 0;">
+              Sincerely,<br>
+              <strong style="color: #1f2937;">The Fortiz Bank Team</strong>
+            </p>
+          </div>
+          
+          ${getEmailFooter()}
         </div>
       </body>
       </html>
@@ -95,38 +183,84 @@ export const emailTemplates = {
 
   // 2. KYC Submitted
   kycSubmitted: (userName: string) => ({
-    subject: 'KYC Verification Submitted Successfully',
+    subject: 'KYC Verification Submitted - Under Review',
     html: `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: #000; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #fff; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb; }
-          .info-box { background: #f9fafb; border-left: 4px solid #000; padding: 15px; margin: 20px 0; border-radius: 8px; }
-        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
       </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>✓ KYC Submitted</h1>
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          ${getEmailHeader()}
+          
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #1f2937; font-size: 24px; margin: 0 0 20px 0;">Dear ${userName},</h2>
+            
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+              Thank you for submitting your Know Your Customer (KYC) verification documents to Fortiz Bank. We have received your information and our compliance team is now reviewing your submission.
+            </p>
+            
+            <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 20px; margin: 25px 0; border-radius: 6px;">
+              <h3 style="color: #065f46; font-size: 18px; margin: 0 0 10px 0;">✓ Submission Received</h3>
+              <p style="color: #047857; font-size: 15px; margin: 5px 0;">
+                Your KYC documents have been successfully submitted and are now in our review queue.
+              </p>
           </div>
-          <div class="content">
-            <h2>Hi ${userName},</h2>
-            <p>We've received your KYC verification documents and they are currently under review.</p>
-            <div class="info-box">
-              <p><strong>What happens next?</strong></p>
-              <ul>
-                <li>Our team will review your documents within 24-48 hours</li>
-                <li>You'll receive an email once your verification is complete</li>
-                <li>After approval, you'll have full access to all banking features</li>
-              </ul>
+            
+            <h3 style="color: #1f2937; font-size: 20px; margin: 30px 0 15px 0;">What Happens Next?</h3>
+            
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <div style="display: table; width: 100%; margin-bottom: 15px;">
+                <div style="display: table-cell; width: 40px; vertical-align: top;">
+                  <div style="width: 32px; height: 32px; background: #10b981; color: white; border-radius: 50%; text-align: center; line-height: 32px; font-weight: bold;">1</div>
             </div>
-            <p>Thank you for your patience!</p>
+                <div style="display: table-cell; vertical-align: top; padding-left: 15px;">
+                  <h4 style="color: #1f2937; font-size: 16px; margin: 0 0 5px 0;">Document Review</h4>
+                  <p style="color: #6b7280; font-size: 14px; margin: 0;">Our compliance team will carefully review your submitted documents to verify your identity.</p>
           </div>
+              </div>
+              
+              <div style="display: table; width: 100%; margin-bottom: 15px;">
+                <div style="display: table-cell; width: 40px; vertical-align: top;">
+                  <div style="width: 32px; height: 32px; background: #10b981; color: white; border-radius: 50%; text-align: center; line-height: 32px; font-weight: bold;">2</div>
+                </div>
+                <div style="display: table-cell; vertical-align: top; padding-left: 15px;">
+                  <h4 style="color: #1f2937; font-size: 16px; margin: 0 0 5px 0;">Review Timeline</h4>
+                  <p style="color: #6b7280; font-size: 14px; margin: 0;">Verification typically takes 24-48 business hours. You'll receive an email once the review is complete.</p>
+                </div>
+              </div>
+              
+              <div style="display: table; width: 100%;">
+                <div style="display: table-cell; width: 40px; vertical-align: top;">
+                  <div style="width: 32px; height: 32px; background: #10b981; color: white; border-radius: 50%; text-align: center; line-height: 32px; font-weight: bold;">3</div>
+                </div>
+                <div style="display: table-cell; vertical-align: top; padding-left: 15px;">
+                  <h4 style="color: #1f2937; font-size: 16px; margin: 0 0 5px 0;">Account Activation</h4>
+                  <p style="color: #6b7280; font-size: 14px; margin: 0;">Once approved, your checking and savings accounts will be created, and you'll have full access to all banking services.</p>
+                </div>
+              </div>
+            </div>
+            
+            <div style="text-align: center; margin: 35px 0;">
+              <a href="https://www.fortizb.com/kyc/status" style="${getButtonStyle()}">Check Status</a>
+            </div>
+            
+            <div style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 6px; padding: 20px; margin: 30px 0;">
+              <h4 style="color: #92400e; font-size: 16px; margin: 0 0 10px 0;">⏱️ Processing Time</h4>
+              <p style="color: #78350f; font-size: 14px; line-height: 1.6; margin: 0;">
+                Most KYC verifications are completed within 24-48 business hours. If we need any additional information, we'll contact you promptly.
+              </p>
+            </div>
+            
+            <p style="color: #4b5563; font-size: 15px; margin: 20px 0 0 0;">
+              Thank you for your patience,<br>
+              <strong style="color: #1f2937;">Fortiz Bank Compliance Team</strong>
+            </p>
+          </div>
+          
+          ${getEmailFooter()}
         </div>
       </body>
       </html>
@@ -135,42 +269,97 @@ export const emailTemplates = {
 
   // 3. KYC Approved
   kycApproved: (userName: string) => ({
-    subject: '🎉 Your KYC Verification is Approved!',
+    subject: 'KYC Verification Approved - Welcome to Full Banking Access',
     html: `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: #000; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #fff; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb; }
-          .button { display: inline-block; padding: 12px 24px; background: #000; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0; }
-          .success-box { background: #f9fafb; border-left: 4px solid #000; padding: 15px; margin: 20px 0; border-radius: 8px; }
-        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
       </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>🎉 KYC Approved!</h1>
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          ${getEmailHeader()}
+          
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #1f2937; font-size: 24px; margin: 0 0 20px 0;">Dear ${userName},</h2>
+            
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+              Congratulations! We are pleased to inform you that your Know Your Customer (KYC) verification has been successfully approved. Your Fortiz Bank account is now fully activated, and you have complete access to all our banking services.
+            </p>
+            
+            <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 20px; margin: 25px 0; border-radius: 6px;">
+              <h3 style="color: #065f46; font-size: 18px; margin: 0 0 10px 0;">✓ Verification Approved</h3>
+              <p style="color: #047857; font-size: 15px; margin: 5px 0;">
+                Your identity has been verified, and your checking and savings accounts are now active and ready to use.
+              </p>
           </div>
-          <div class="content">
-            <h2>Congratulations, ${userName}!</h2>
-            <p>Great news! Your KYC verification has been <strong>approved</strong>.</p>
-            <div class="success-box">
-              <p><strong>You now have access to:</strong></p>
-              <ul>
-                <li>✓ Full checking and savings accounts</li>
-                <li>✓ Money transfers</li>
-                <li>✓ Bill payments</li>
-                <li>✓ Card requests</li>
-                <li>✓ All premium features</li>
-              </ul>
+            
+            <h3 style="color: #1f2937; font-size: 20px; margin: 30px 0 15px 0;">You Now Have Access To:</h3>
+            
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6;">
+                    <span style="color: #10b981; font-size: 18px; margin-right: 10px;">✓</span>
+                    <strong style="color: #1f2937;">Checking & Savings Accounts</strong>
+                    <br>
+                    <span style="color: #6b7280; font-size: 14px; margin-left: 28px;">Manage your finances with full account access</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6;">
+                    <span style="color: #10b981; font-size: 18px; margin-right: 10px;">✓</span>
+                    <strong style="color: #1f2937;">Money Transfers</strong>
+                    <br>
+                    <span style="color: #6b7280; font-size: 14px; margin-left: 28px;">Send and receive money instantly</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6;">
+                    <span style="color: #10b981; font-size: 18px; margin-right: 10px;">✓</span>
+                    <strong style="color: #1f2937;">Bill Payments</strong>
+                    <br>
+                    <span style="color: #6b7280; font-size: 14px; margin-left: 28px;">Pay bills securely and on time</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6;">
+                    <span style="color: #10b981; font-size: 18px; margin-right: 10px;">✓</span>
+                    <strong style="color: #1f2937;">Debit Card Requests</strong>
+                    <br>
+                    <span style="color: #6b7280; font-size: 14px; margin-left: 28px;">Order your Fortiz Bank debit card</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0;">
+                    <span style="color: #10b981; font-size: 18px; margin-right: 10px;">✓</span>
+                    <strong style="color: #1f2937;">All Premium Features</strong>
+                    <br>
+                    <span style="color: #6b7280; font-size: 14px; margin-left: 28px;">Access to refunds, statements, and more</span>
+                  </td>
+                </tr>
+              </table>
             </div>
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" class="button">Access Your Dashboard</a>
-            <p>Start exploring all the features Fortiz Bank has to offer!</p>
+            
+            <div style="text-align: center; margin: 35px 0;">
+              <a href="https://www.fortizb.com/dashboard" style="${getButtonStyle()}">Start Banking Now</a>
           </div>
+            
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 20px; margin: 30px 0;">
+              <h4 style="color: #1e40af; font-size: 16px; margin: 0 0 10px 0;">🎉 Welcome to Fortiz Bank</h4>
+              <p style="color: #1e40af; font-size: 14px; line-height: 1.6; margin: 0;">
+                We're excited to have you as a fully verified member. Explore your dashboard to discover all the features and services we offer to make your banking experience seamless and secure.
+              </p>
+            </div>
+            
+            <p style="color: #4b5563; font-size: 15px; margin: 20px 0 0 0;">
+              Welcome aboard,<br>
+              <strong style="color: #1f2937;">The Fortiz Bank Team</strong>
+            </p>
+          </div>
+          
+          ${getEmailFooter()}
         </div>
       </body>
       </html>
@@ -179,45 +368,88 @@ export const emailTemplates = {
 
   // 4. KYC Rejected
   kycRejected: (userName: string, reason?: string) => ({
-    subject: 'KYC Verification - Action Required',
+    subject: 'KYC Verification - Additional Information Required',
     html: `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: #000; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #fff; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb; }
-          .button { display: inline-block; padding: 12px 24px; background: #000; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0; }
-          .warning-box { background: #f9fafb; border-left: 4px solid #000; padding: 15px; margin: 20px 0; border-radius: 8px; }
-        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
       </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>KYC Verification Update</h1>
-          </div>
-          <div class="content">
-            <h2>Hi ${userName},</h2>
-            <p>Unfortunately, we were unable to approve your KYC verification at this time.</p>
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          ${getEmailHeader()}
+          
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #1f2937; font-size: 24px; margin: 0 0 20px 0;">Dear ${userName},</h2>
+            
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+              Thank you for submitting your Know Your Customer (KYC) verification to Fortiz Bank. After a careful review of your submission, we need additional information or clearer documentation to complete your verification process.
+            </p>
+            
             ${
               reason
-                ? `<div class="warning-box"><p><strong>Reason:</strong> ${reason}</p></div>`
-                : ''
+                ? `<div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 20px; margin: 25px 0; border-radius: 6px;">
+              <h3 style="color: #991b1b; font-size: 18px; margin: 0 0 10px 0;">⚠️ Reason for Review</h3>
+              <p style="color: #b91c1c; font-size: 15px; margin: 5px 0;">
+                ${reason}
+              </p>
+            </div>`
+                : '<div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 20px; margin: 25px 0; border-radius: 6px;"><h3 style="color: #991b1b; font-size: 18px; margin: 0 0 10px 0;">⚠️ Action Required</h3><p style="color: #b91c1c; font-size: 15px; margin: 5px 0;">Additional verification information is needed to proceed with your application.</p></div>'
             }
-            <p><strong>What you can do:</strong></p>
-            <ul>
-              <li>Review your submitted documents</li>
-              <li>Ensure all information is clear and accurate</li>
-              <li>Resubmit your KYC application</li>
-            </ul>
-            <a href="${
-              process.env.NEXT_PUBLIC_APP_URL
-            }/kyc" class="button">Resubmit KYC</a>
-            <p>If you need assistance, please contact our support team.</p>
+            
+            <h3 style="color: #1f2937; font-size: 20px; margin: 30px 0 15px 0;">Next Steps to Complete Verification</h3>
+            
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <div style="display: table; width: 100%; margin-bottom: 15px;">
+                <div style="display: table-cell; width: 40px; vertical-align: top;">
+                  <div style="width: 32px; height: 32px; background: #ef4444; color: white; border-radius: 50%; text-align: center; line-height: 32px; font-weight: bold;">1</div>
           </div>
+                <div style="display: table-cell; vertical-align: top; padding-left: 15px;">
+                  <h4 style="color: #1f2937; font-size: 16px; margin: 0 0 5px 0;">Review Your Documents</h4>
+                  <p style="color: #6b7280; font-size: 14px; margin: 0;">Ensure all submitted documents are clear, legible, and show complete information.</p>
+                </div>
+              </div>
+              
+              <div style="display: table; width: 100%; margin-bottom: 15px;">
+                <div style="display: table-cell; width: 40px; vertical-align: top;">
+                  <div style="width: 32px; height: 32px; background: #ef4444; color: white; border-radius: 50%; text-align: center; line-height: 32px; font-weight: bold;">2</div>
+                </div>
+                <div style="display: table-cell; vertical-align: top; padding-left: 15px;">
+                  <h4 style="color: #1f2937; font-size: 16px; margin: 0 0 5px 0;">Verify Accuracy</h4>
+                  <p style="color: #6b7280; font-size: 14px; margin: 0;">Double-check that all personal information matches your official identification documents.</p>
+                </div>
+              </div>
+              
+              <div style="display: table; width: 100%;">
+                <div style="display: table-cell; width: 40px; vertical-align: top;">
+                  <div style="width: 32px; height: 32px; background: #ef4444; color: white; border-radius: 50%; text-align: center; line-height: 32px; font-weight: bold;">3</div>
+                </div>
+                <div style="display: table-cell; vertical-align: top; padding-left: 15px;">
+                  <h4 style="color: #1f2937; font-size: 16px; margin: 0 0 5px 0;">Resubmit Application</h4>
+                  <p style="color: #6b7280; font-size: 14px; margin: 0;">Submit your updated KYC application with the corrected or additional information.</p>
+                </div>
+              </div>
+            </div>
+            
+            <div style="text-align: center; margin: 35px 0;">
+              <a href="https://www.fortizb.com/kyc" style="${getButtonStyle()}">Resubmit KYC Now</a>
+            </div>
+            
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 20px; margin: 30px 0;">
+              <h4 style="color: #1e40af; font-size: 16px; margin: 0 0 10px 0;">💡 Need Help?</h4>
+              <p style="color: #1e40af; font-size: 14px; line-height: 1.6; margin: 0;">
+                Our support team is here to assist you with the resubmission process. If you have questions about what information is needed, please don't hesitate to contact us.
+              </p>
+            </div>
+            
+            <p style="color: #4b5563; font-size: 15px; margin: 20px 0 0 0;">
+              We look forward to serving you,<br>
+              <strong style="color: #1f2937;">Fortiz Bank Compliance Team</strong>
+            </p>
+          </div>
+          
+          ${getEmailFooter()}
         </div>
       </body>
       </html>
@@ -230,66 +462,113 @@ export const emailTemplates = {
     cardType: string,
     deliveryAddress: string
   ) => ({
-    subject: `Your ${cardType} Card Request is Being Processed`,
+    subject: `Debit Card Request Confirmed - ${cardType}`,
     html: `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: #000; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #fff; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb; }
-          .info-box { background: #f9fafb; border-left: 4px solid #000; padding: 15px; margin: 20px 0; border-radius: 8px; }
-        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
       </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>💳 Card Request Received</h1>
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          ${getEmailHeader()}
+          
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #1f2937; font-size: 24px; margin: 0 0 20px 0;">Dear ${userName},</h2>
+            
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+              We have successfully received your request for a ${cardType} debit card from Fortiz Bank. Your card is now being processed and will be delivered to your registered address shortly.
+            </p>
+            
+            <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 20px; margin: 25px 0; border-radius: 6px;">
+              <h3 style="color: #065f46; font-size: 18px; margin: 0 0 10px 0;">💳 Card Request Confirmed</h3>
+              <p style="color: #047857; font-size: 15px; margin: 5px 0;">
+                Your ${cardType} card request has been approved and is now in production.
+              </p>
           </div>
-          <div class="content">
-            <h2>Hi ${userName},</h2>
-            <p>Your ${cardType} card request has been successfully submitted!</p>
-            <div class="info-box">
-              <h3 style="margin-top: 0; color: #000;">Card Request Details</h3>
-              <div style="display: grid; gap: 10px;">
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
-                  <span><strong>Card Type:</strong></span>
-                  <span>${cardType}</span>
+            
+            <h3 style="color: #1f2937; font-size: 20px; margin: 30px 0 15px 0;">Card Details</h3>
+            
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">Card Type</td>
+                  <td style="padding: 12px 0; text-align: right; color: #1f2937; font-weight: 600;">${cardType}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">Delivery Address</td>
+                  <td style="padding: 12px 0; text-align: right; color: #1f2937; font-weight: 600; max-width: 200px; word-wrap: break-word;">${deliveryAddress}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">Expected Delivery</td>
+                  <td style="padding: 12px 0; text-align: right; color: #1f2937; font-weight: 600;">5-7 Business Days</td>
+                </tr>
+              </table>
+            </div>
+            
+            <h3 style="color: #1f2937; font-size: 20px; margin: 30px 0 15px 0;">What Happens Next?</h3>
+            
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <div style="display: table; width: 100%; margin-bottom: 15px;">
+                <div style="display: table-cell; width: 40px; vertical-align: top;">
+                  <div style="width: 32px; height: 32px; background: #0284c7; color: white; border-radius: 50%; text-align: center; line-height: 32px; font-weight: bold;">1</div>
+          </div>
+                <div style="display: table-cell; vertical-align: top; padding-left: 15px;">
+                  <h4 style="color: #1f2937; font-size: 16px; margin: 0 0 5px 0;">Verification Call</h4>
+                  <p style="color: #6b7280; font-size: 14px; margin: 0;">Our security team will contact you within 24 hours to verify your card request and confirm your identity.</p>
                 </div>
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
-                  <span><strong>Delivery Address:</strong></span>
-                  <span>${deliveryAddress}</span>
+              </div>
+              
+              <div style="display: table; width: 100%; margin-bottom: 15px;">
+                <div style="display: table-cell; width: 40px; vertical-align: top;">
+                  <div style="width: 32px; height: 32px; background: #0284c7; color: white; border-radius: 50%; text-align: center; line-height: 32px; font-weight: bold;">2</div>
                 </div>
-                <div style="display: flex; justify-content: space-between; padding: 8px 0;">
-                  <span><strong>Expected Delivery:</strong></span>
-                  <span>5-7 business days</span>
+                <div style="display: table-cell; vertical-align: top; padding-left: 15px;">
+                  <h4 style="color: #1f2937; font-size: 16px; margin: 0 0 5px 0;">Card Production</h4>
+                  <p style="color: #6b7280; font-size: 14px; margin: 0;">Once verified, your card will be manufactured with enhanced security features and your personalized information.</p>
+                </div>
+              </div>
+              
+              <div style="display: table; width: 100%; margin-bottom: 15px;">
+                <div style="display: table-cell; width: 40px; vertical-align: top;">
+                  <div style="width: 32px; height: 32px; background: #0284c7; color: white; border-radius: 50%; text-align: center; line-height: 32px; font-weight: bold;">3</div>
+                </div>
+                <div style="display: table-cell; vertical-align: top; padding-left: 15px;">
+                  <h4 style="color: #1f2937; font-size: 16px; margin: 0 0 5px 0;">Shipping Notification</h4>
+                  <p style="color: #6b7280; font-size: 14px; margin: 0;">You'll receive an email with tracking information once your card has been shipped.</p>
+                </div>
+              </div>
+              
+              <div style="display: table; width: 100%;">
+                <div style="display: table-cell; width: 40px; vertical-align: top;">
+                  <div style="width: 32px; height: 32px; background: #0284c7; color: white; border-radius: 50%; text-align: center; line-height: 32px; font-weight: bold;">4</div>
+                </div>
+                <div style="display: table-cell; vertical-align: top; padding-left: 15px;">
+                  <h4 style="color: #1f2937; font-size: 16px; margin: 0 0 5px 0;">Card Delivery & Activation</h4>
+                  <p style="color: #6b7280; font-size: 14px; margin: 0;">Upon receiving your card, follow the included instructions to activate it and set your PIN.</p>
                 </div>
               </div>
             </div>
-
-            <div style="background: #f9fafb; border-left: 4px solid #374151; padding: 15px; margin: 20px 0; border-radius: 8px;">
-              <p style="margin: 0; color: #374151;"><strong>What happens next?</strong></p>
-              <ul style="margin: 10px 0 0 0; color: #374151;">
-                <li>Our team will contact you within 24 hours to verify your request</li>
-                <li>Your card will be processed and manufactured</li>
-                <li>You'll receive a shipping notification once your card is dispatched</li>
-                <li>Your card will be delivered to the address provided</li>
-              </ul>
+            
+            <div style="text-align: center; margin: 35px 0;">
+              <a href="https://www.fortizb.com/dashboard/cards" style="${getButtonStyle()}">Track Card Status</a>
             </div>
-
-            <p>You can track your card request in your dashboard under "My Cards".</p>
             
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/cards" style="display: inline-block; padding: 12px 24px; background: #000; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0;">View My Cards</a>
+            <div style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 6px; padding: 20px; margin: 30px 0;">
+              <h4 style="color: #92400e; font-size: 16px; margin: 0 0 10px 0;">🔒 Security Note</h4>
+              <p style="color: #78350f; font-size: 14px; line-height: 1.6; margin: 0;">
+                Your card will arrive in a sealed, unmarked envelope for security. Never share your card details, PIN, or CVV with anyone. Fortiz Bank will never ask for this information via email or phone.
+              </p>
+            </div>
             
-            <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
-              If you have any questions about your card request, please contact our support team.
+            <p style="color: #4b5563; font-size: 15px; margin: 20px 0 0 0;">
+              Thank you for choosing Fortiz Bank,<br>
+              <strong style="color: #1f2937;">Card Services Team</strong>
             </p>
-            
-            <p>Thank you for banking with Fortiz!</p>
           </div>
+          
+          ${getEmailFooter()}
         </div>
       </body>
       </html>
@@ -303,50 +582,87 @@ export const emailTemplates = {
     recipient: string,
     reference: string
   ) => ({
-    subject: `Transfer Confirmation - $${amount.toFixed(2)}`,
+    subject: `Money Transfer Successful - $${amount.toFixed(2)} Sent`,
     html: `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: #000; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #fff; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb; }
-          .transaction-details { background: #f9fafb; border: 1px solid #e5e7eb; padding: 20px; border-radius: 8px; margin: 20px 0; }
-          .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e7eb; }
-        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
       </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>✓ Transfer Successful</h1>
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          ${getEmailHeader()}
+          
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #1f2937; font-size: 24px; margin: 0 0 20px 0;">Dear ${userName},</h2>
+            
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+              Your money transfer of <strong>$${amount.toFixed(
+                2
+              )}</strong> has been successfully processed by Fortiz Bank. The funds have been sent to the recipient and should be available in their account shortly.
+            </p>
+            
+            <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 20px; margin: 25px 0; border-radius: 6px;">
+              <h3 style="color: #065f46; font-size: 18px; margin: 0 0 10px 0;">✓ Transfer Completed</h3>
+              <p style="color: #047857; font-size: 15px; margin: 5px 0;">
+                Your transaction has been successfully processed and the funds have been transferred.
+              </p>
           </div>
-          <div class="content">
-            <h2>Hi ${userName},</h2>
-            <p>Your money transfer was successful!</p>
-            <div class="transaction-details">
-              <h3>Transaction Details</h3>
-              <div class="detail-row">
-                <span>Amount:</span>
-                <strong>$${amount.toFixed(2)}</strong>
+            
+            <h3 style="color: #1f2937; font-size: 20px; margin: 30px 0 15px 0;">Transaction Details</h3>
+            
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">Transfer Amount</td>
+                  <td style="padding: 12px 0; text-align: right; color: #1f2937; font-weight: 600; font-size: 18px;">$${amount.toFixed(
+                    2
+                  )}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">Recipient</td>
+                  <td style="padding: 12px 0; text-align: right; color: #1f2937; font-weight: 600;">${recipient}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">Reference Number</td>
+                  <td style="padding: 12px 0; text-align: right; color: #1f2937; font-weight: 600; font-family: monospace; font-size: 12px;">${reference}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">Transaction Date</td>
+                  <td style="padding: 12px 0; text-align: right; color: #1f2937; font-weight: 600;">${new Date().toLocaleString(
+                    'en-US',
+                    {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true,
+                    }
+                  )}</td>
+                </tr>
+              </table>
               </div>
-              <div class="detail-row">
-                <span>Recipient:</span>
-                <strong>${recipient}</strong>
+            
+            <div style="text-align: center; margin: 35px 0;">
+              <a href="https://www.fortizb.com/dashboard/transactions" style="${getButtonStyle()}">View Transaction History</a>
               </div>
-              <div class="detail-row">
-                <span>Reference:</span>
-                <strong>${reference}</strong>
+            
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 20px; margin: 30px 0;">
+              <h4 style="color: #1e40af; font-size: 16px; margin: 0 0 10px 0;">📋 Important Information</h4>
+              <p style="color: #1e40af; font-size: 14px; line-height: 1.6; margin: 0;">
+                Please keep this reference number for your records: <strong>${reference}</strong>. If you notice any discrepancies or did not authorize this transfer, please contact our fraud prevention team immediately at contact@fortizb.com or call 1-800-FORTIZ-B.
+              </p>
               </div>
-              <div class="detail-row">
-                <span>Date:</span>
-                <strong>${new Date().toLocaleString()}</strong>
+            
+            <p style="color: #4b5563; font-size: 15px; margin: 20px 0 0 0;">
+              Thank you for banking with us,<br>
+              <strong style="color: #1f2937;">Fortiz Bank Transaction Team</strong>
+            </p>
               </div>
-            </div>
-            <p>Thank you for using Fortiz Bank!</p>
-          </div>
+          
+          ${getEmailFooter()}
         </div>
       </body>
       </html>
@@ -360,50 +676,94 @@ export const emailTemplates = {
     payeeName: string,
     reference: string
   ) => ({
-    subject: `Bill Payment Confirmation - $${amount.toFixed(2)}`,
+    subject: `Bill Payment Processed - $${amount.toFixed(2)} to ${payeeName}`,
     html: `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: #000; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #fff; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb; }
-          .transaction-details { background: #f9fafb; border: 1px solid #e5e7eb; padding: 20px; border-radius: 8px; margin: 20px 0; }
-          .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e7eb; }
-        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
       </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>✓ Bill Payment Successful</h1>
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          ${getEmailHeader()}
+          
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #1f2937; font-size: 24px; margin: 0 0 20px 0;">Dear ${userName},</h2>
+            
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+              Your bill payment of <strong>$${amount.toFixed(
+                2
+              )}</strong> to ${payeeName} has been successfully processed through Fortiz Bank. The payment has been submitted and should be credited to your payee's account within the standard processing time.
+            </p>
+            
+            <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 20px; margin: 25px 0; border-radius: 6px;">
+              <h3 style="color: #065f46; font-size: 18px; margin: 0 0 10px 0;">✓ Payment Completed</h3>
+              <p style="color: #047857; font-size: 15px; margin: 5px 0;">
+                Your bill payment has been successfully processed and submitted to the payee.
+              </p>
           </div>
-          <div class="content">
-            <h2>Hi ${userName},</h2>
-            <p>Your bill payment was processed successfully!</p>
-            <div class="transaction-details">
-              <h3>Payment Details</h3>
-              <div class="detail-row">
-                <span>Amount:</span>
-                <strong>$${amount.toFixed(2)}</strong>
+            
+            <h3 style="color: #1f2937; font-size: 20px; margin: 30px 0 15px 0;">Payment Details</h3>
+            
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">Payment Amount</td>
+                  <td style="padding: 12px 0; text-align: right; color: #1f2937; font-weight: 600; font-size: 18px;">$${amount.toFixed(
+                    2
+                  )}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">Payee Name</td>
+                  <td style="padding: 12px 0; text-align: right; color: #1f2937; font-weight: 600;">${payeeName}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">Confirmation Number</td>
+                  <td style="padding: 12px 0; text-align: right; color: #1f2937; font-weight: 600; font-family: monospace; font-size: 12px;">${reference}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">Payment Date</td>
+                  <td style="padding: 12px 0; text-align: right; color: #1f2937; font-weight: 600;">${new Date().toLocaleString(
+                    'en-US',
+                    {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true,
+                    }
+                  )}</td>
+                </tr>
+              </table>
               </div>
-              <div class="detail-row">
-                <span>Payee:</span>
-                <strong>${payeeName}</strong>
+            
+            <div style="text-align: center; margin: 35px 0;">
+              <a href="https://www.fortizb.com/dashboard/bills" style="${getButtonStyle()}">Manage Bill Payments</a>
               </div>
-              <div class="detail-row">
-                <span>Reference:</span>
-                <strong>${reference}</strong>
+            
+            <div style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 6px; padding: 20px; margin: 30px 0;">
+              <h4 style="color: #92400e; font-size: 16px; margin: 0 0 10px 0;">📋 Keep This For Your Records</h4>
+              <p style="color: #78350f; font-size: 14px; line-height: 1.6; margin: 0;">
+                Please save this confirmation number: <strong>${reference}</strong>. This serves as your proof of payment. If you have questions about this payment or need to verify it with the payee, use this reference number.
+              </p>
               </div>
-              <div class="detail-row">
-                <span>Date:</span>
-                <strong>${new Date().toLocaleString()}</strong>
+            
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 20px; margin: 30px 0;">
+              <h4 style="color: #1e40af; font-size: 16px; margin: 0 0 10px 0;">⏱️ Processing Time</h4>
+              <p style="color: #1e40af; font-size: 14px; line-height: 1.6; margin: 0;">
+                Most bill payments are posted to payee accounts within 1-3 business days. Some payees may take longer depending on their processing systems. If you have concerns about payment timing, please contact the payee directly.
+              </p>
               </div>
+            
+            <p style="color: #4b5563; font-size: 15px; margin: 20px 0 0 0;">
+              Thank you for using Fortiz Bank,<br>
+              <strong style="color: #1f2937;">Bill Payment Services Team</strong>
+            </p>
             </div>
-            <p>Keep this email for your records.</p>
-          </div>
+          
+          ${getEmailFooter()}
         </div>
       </body>
       </html>
@@ -417,81 +777,190 @@ export const emailTemplates = {
     reason: string,
     refundId: string
   ) => ({
-    subject: `💰 Refund Created - $${amount.toFixed(2)}`,
+    subject: `Refund Request Processed - $${amount.toFixed(2)} - Fortiz Bank`,
     html: `
       <!DOCTYPE html>
-      <html>
+      <html lang="en">
       <head>
         <meta charset="utf-8">
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: #000; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #fff; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb; }
-          .info-box { background: #f9fafb; border-left: 4px solid #000; padding: 20px; margin: 20px 0; border-radius: 8px; }
-          .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
-          .detail-row:last-child { border-bottom: none; }
-          .button { display: inline-block; padding: 12px 24px; background: #000; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0; }
-          .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #6b7280; }
-        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
       </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>💰 Refund Created</h1>
-            <p style="margin: 10px 0 0 0; opacity: 0.9;">Your refund has been processed</p>
-          </div>
-          <div class="content">
-            <h2>Hi ${userName},</h2>
-            <p>Great news! A refund has been created for your account and is being processed.</p>
-            
-            <div class="info-box">
-              <h3 style="margin-top: 0; color: #000;">Refund Details</h3>
-              <div class="detail-row">
-                <span><strong>Amount:</strong></span>
-                <span style="font-size: 18px; font-weight: bold; color: #000;">$${amount.toFixed(
-                  2
-                )}</span>
-              </div>
-              <div class="detail-row">
-                <span><strong>Reason:</strong></span>
-                <span style="text-transform: capitalize;">${reason.replace(
-                  '_',
-                  ' '
-                )}</span>
-              </div>
-              <div class="detail-row">
-                <span><strong>Reference ID:</strong></span>
-                <span style="font-family: monospace;">${refundId}</span>
-              </div>
-              <div class="detail-row">
-                <span><strong>Date Created:</strong></span>
-                <span>${new Date().toLocaleDateString()}</span>
-              </div>
-            </div>
-
-                <div style="background: #f9fafb; border-left: 4px solid #374151; padding: 15px; margin: 20px 0; border-radius: 8px;">
-                  <p style="margin: 0; color: #374151;"><strong>What happens next?</strong></p>
-                  <ul style="margin: 10px 0 0 0; color: #374151;">
-                    <li>Our team will contact you within 24 hours to discuss next steps</li>
-                    <li>The refund will be credited to your checking account</li>
-                    <li>You'll receive another email once the refund is completed</li>
-                    <li>Processing typically takes 1-3 business days</li>
-                  </ul>
-                </div>
-
-            <p>You can track this refund in your dashboard under "My Refunds".</p>
-            
-            <a href="${
-              process.env.NEXT_PUBLIC_APP_URL
-            }/dashboard/refunds" class="button">View Refunds</a>
-            
-            <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
-              If you have any questions about this refund, please contact our support team.
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 40px 30px; text-align: center;">
+            <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: 700; letter-spacing: 2px;">
+              FORTIZ BANK
+            </h1>
+            <p style="margin: 8px 0 0 0; color: #e5e7eb; font-size: 14px; letter-spacing: 1px;">
+              Banking Made Simple
             </p>
           </div>
-          <div class="footer">
-            <p>&copy; 2025 Fortiz Bank. All rights reserved.</p>
+          
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #1f2937; font-size: 24px; margin: 0 0 20px 0;">Dear ${userName},</h2>
+            
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+              We have received and processed your refund request at Fortiz Bank. This email confirms the details of your refund and outlines the next steps in the process.
+            </p>
+            
+            <div style="background: #f0fdf4; border: 2px solid #16a34a; padding: 5px; margin: 30px 0; border-radius: 8px; text-align: center;">
+              <div style="background: white; padding: 25px; border-radius: 6px;">
+                <div style="display: inline-block; background: #16a34a; color: white; padding: 8px 20px; border-radius: 20px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 15px;">
+                  ✓ REFUND CREATED
+            </div>
+                <h3 style="color: #1f2937; font-size: 32px; margin: 10px 0; font-weight: 700;">$${amount.toFixed(
+                  2
+                )}</h3>
+                <p style="color: #6b7280; font-size: 14px; margin: 5px 0 0 0;">Refund Amount</p>
+              </div>
+            </div>
+            
+            <div style="background: #f9fafb; border: 1px solid #e5e7eb; padding: 25px; margin: 30px 0; border-radius: 8px;">
+              <h3 style="color: #1f2937; font-size: 18px; margin: 0 0 20px 0; padding-bottom: 15px; border-bottom: 2px solid #e5e7eb;">Refund Request Details</h3>
+              
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">
+                    <strong style="color: #6b7280; font-size: 14px;">Refund Amount:</strong>
+                  </td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
+                    <span style="color: #1f2937; font-size: 16px; font-weight: 700;">$${amount.toFixed(
+                      2
+                    )}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">
+                    <strong style="color: #6b7280; font-size: 14px;">Reason:</strong>
+                  </td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
+                    <span style="color: #1f2937; font-size: 15px; text-transform: capitalize;">${reason.replace(
+                      '_',
+                      ' '
+                    )}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">
+                    <strong style="color: #6b7280; font-size: 14px;">Reference ID:</strong>
+                  </td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
+                    <span style="color: #1f2937; font-size: 14px; font-family: monospace;">${refundId}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">
+                    <strong style="color: #6b7280; font-size: 14px;">Date Created:</strong>
+                  </td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
+                    <span style="color: #1f2937; font-size: 14px;">${new Date().toLocaleDateString(
+                      'en-US',
+                      { month: 'long', day: 'numeric', year: 'numeric' }
+                    )}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0;">
+                    <strong style="color: #6b7280; font-size: 14px;">Status:</strong>
+                  </td>
+                  <td style="padding: 12px 0; text-align: right;">
+                    <span style="display: inline-block; background: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 12px; font-size: 13px; font-weight: 600;">Processing</span>
+                  </td>
+                </tr>
+              </table>
+            </div>
+            
+            <h3 style="color: #1f2937; font-size: 20px; margin: 30px 0 15px 0;">What Happens Next?</h3>
+            
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 20px; margin: 0 0 20px 0;">
+              <table style="width: 100%;">
+                <tr>
+                  <td style="vertical-align: top; width: 40px; padding-top: 5px;">
+                    <div style="width: 32px; height: 32px; background: #fef3c7; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #fbbf24;">
+                      <span style="color: #92400e; font-weight: bold; font-size: 14px;">1</span>
+                    </div>
+                  </td>
+                  <td style="padding: 5px 0 15px 15px;">
+                    <strong style="color: #1f2937; font-size: 15px;">Team Review (Within 24 Hours)</strong>
+                    <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin: 5px 0 0 0;">
+                      Our customer service team will contact you to verify the refund request and discuss the next steps.
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="vertical-align: top; width: 40px; padding-top: 5px;">
+                    <div style="width: 32px; height: 32px; background: #fef3c7; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #fbbf24;">
+                      <span style="color: #92400e; font-weight: bold; font-size: 14px;">2</span>
+                    </div>
+                  </td>
+                  <td style="padding: 5px 0 15px 15px;">
+                    <strong style="color: #1f2937; font-size: 15px;">Refund Processing</strong>
+                    <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin: 5px 0 0 0;">
+                      Once approved, the refund amount will be credited to your checking account.
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="vertical-align: top; width: 40px; padding-top: 5px;">
+                    <div style="width: 32px; height: 32px; background: #fef3c7; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #fbbf24;">
+                      <span style="color: #92400e; font-weight: bold; font-size: 14px;">3</span>
+                    </div>
+                  </td>
+                  <td style="padding: 5px 0;">
+                    <strong style="color: #1f2937; font-size: 15px;">Completion Confirmation</strong>
+                    <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin: 5px 0 0 0;">
+                      You'll receive another email once the refund is completed. Processing typically takes 1-3 business days.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </div>
+            
+            <div style="text-align: center; margin: 35px 0;">
+              <a href="https://www.fortizb.com/dashboard/refunds" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #1f2937 0%, #374151 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">Track My Refund</a>
+            </div>
+            
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 20px; margin: 30px 0;">
+              <h4 style="color: #1e40af; font-size: 16px; margin: 0 0 10px 0;">📋 Important Information</h4>
+              <p style="color: #1e40af; font-size: 14px; line-height: 1.6; margin: 0;">
+                Please keep this reference ID for your records: <strong>${refundId}</strong>. If you have any questions or need to follow up on this refund, use this reference number when contacting our support team.
+              </p>
+            </div>
+            
+            <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 25px 0 0 0;">
+              We appreciate your patience as we process your refund request.
+            </p>
+            
+            <p style="color: #4b5563; font-size: 15px; margin: 20px 0 0 0;">
+              Sincerely,<br>
+              <strong style="color: #1f2937;">Fortiz Bank Customer Service Team</strong>
+            </p>
+          </div>
+          
+          <div style="background: #f9fafb; padding: 30px; border-top: 1px solid #e5e7eb; margin-top: 40px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+              <h3 style="margin: 0 0 10px 0; color: #1f2937; font-size: 18px;">Need Assistance?</h3>
+              <p style="margin: 5px 0; color: #6b7280; font-size: 14px;">
+                Our customer support team is available 24/7 to help you.
+              </p>
+              <p style="margin: 10px 0;">
+                <strong style="color: #1f2937;">Email:</strong> 
+                <a href="mailto:contact@fortizb.com" style="color: #2563eb; text-decoration: none;">contact@fortizb.com</a>
+              </p>
+              <p style="margin: 5px 0;">
+                <strong style="color: #1f2937;">Phone:</strong> 
+                <span style="color: #6b7280;">1-800-FORTIZ-B (1-800-367-8492)</span>
+              </p>
+            </div>
+            
+            <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 20px;">
+              <p style="text-align: center; color: #9ca3af; font-size: 12px; line-height: 1.6; margin: 10px 0;">
+                This is an automated message from Fortiz Bank. Please do not reply directly to this email.
+              </p>
+              <p style="text-align: center; color: #9ca3af; font-size: 12px; margin: 10px 0;">
+                &copy; ${new Date().getFullYear()} Fortiz Bank. All rights reserved. Member FDIC.
+              </p>
+            </div>
           </div>
         </div>
       </body>
@@ -506,41 +975,141 @@ export const emailTemplates = {
     status: string,
     refundId: string
   ) => ({
-    subject: `Refund ${status} - $${amount.toFixed(2)}`,
+    subject: `Refund Status Update - ${
+      status.charAt(0).toUpperCase() + status.slice(1)
+    } ($${amount.toFixed(2)})`,
     html: `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: #000; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #fff; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb; }
-          .status-box { background: #f9fafb; border-left: 4px solid #000; padding: 15px; margin: 20px 0; border-radius: 8px; }
-        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
       </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>Refund Status Update</h1>
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          ${getEmailHeader()}
+          
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #1f2937; font-size: 24px; margin: 0 0 20px 0;">Dear ${userName},</h2>
+            
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+              We are writing to inform you that the status of your refund request with Fortiz Bank has been updated. Below are the current details of your refund.
+            </p>
+            
+            <div style="background: ${
+              status === 'posted' || status === 'completed'
+                ? '#ecfdf5'
+                : status === 'cancelled' || status === 'failed'
+                ? '#fef2f2'
+                : '#fef3c7'
+            }; border-left: 4px solid ${
+      status === 'posted' || status === 'completed'
+        ? '#10b981'
+        : status === 'cancelled' || status === 'failed'
+        ? '#ef4444'
+        : '#fbbf24'
+    }; padding: 20px; margin: 25px 0; border-radius: 6px;">
+              <h3 style="color: ${
+                status === 'posted' || status === 'completed'
+                  ? '#065f46'
+                  : status === 'cancelled' || status === 'failed'
+                  ? '#991b1b'
+                  : '#92400e'
+              }; font-size: 18px; margin: 0 0 10px 0;">
+                ${
+                  status === 'posted' || status === 'completed'
+                    ? '✓'
+                    : status === 'cancelled' || status === 'failed'
+                    ? '✗'
+                    : '⏱️'
+                } Status: ${status.charAt(0).toUpperCase() + status.slice(1)}
+              </h3>
+              <p style="color: ${
+                status === 'posted' || status === 'completed'
+                  ? '#047857'
+                  : status === 'cancelled' || status === 'failed'
+                  ? '#b91c1c'
+                  : '#78350f'
+              }; font-size: 15px; margin: 5px 0;">
+                ${
+                  status === 'posted' || status === 'completed'
+                    ? 'Your refund has been successfully processed and the funds have been credited to your checking account.'
+                    : status === 'cancelled' || status === 'failed'
+                    ? 'Unfortunately, your refund request could not be processed. Please contact support for more information.'
+                    : 'Your refund request is currently being reviewed and processed by our team.'
+                }
+              </p>
           </div>
-          <div class="content">
-            <h2>Hi ${userName},</h2>
-            <p>Your refund status has been updated.</p>
-            <div class="status-box">
-              <p><strong>Status:</strong> ${status.toUpperCase()}</p>
-              <p><strong>Amount:</strong> $${amount.toFixed(2)}</p>
-              <p><strong>Reference ID:</strong> ${refundId}</p>
+            
+            <h3 style="color: #1f2937; font-size: 20px; margin: 30px 0 15px 0;">Refund Details</h3>
+            
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">Refund Amount</td>
+                  <td style="padding: 12px 0; text-align: right; color: #1f2937; font-weight: 600; font-size: 18px;">$${amount.toFixed(
+                    2
+                  )}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">Current Status</td>
+                  <td style="padding: 12px 0; text-align: right;"><span style="display: inline-block; background: ${
+                    status === 'posted' || status === 'completed'
+                      ? '#ecfdf5'
+                      : status === 'cancelled' || status === 'failed'
+                      ? '#fef2f2'
+                      : '#fef3c7'
+                  }; color: ${
+      status === 'posted' || status === 'completed'
+        ? '#065f46'
+        : status === 'cancelled' || status === 'failed'
+        ? '#991b1b'
+        : '#92400e'
+    }; padding: 6px 12px; border-radius: 12px; font-size: 13px; font-weight: 600;">${status.toUpperCase()}</span></td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">Reference ID</td>
+                  <td style="padding: 12px 0; text-align: right; color: #1f2937; font-weight: 600; font-family: monospace; font-size: 12px;">${refundId}</td>
+                </tr>
+              </table>
             </div>
+            
+            <div style="text-align: center; margin: 35px 0;">
+              <a href="https://www.fortizb.com/dashboard/refunds" style="${getButtonStyle()}">View Refund Status</a>
+            </div>
+            
             ${
-              status === 'posted'
-                ? '<p>The refund has been processed and the funds have been credited to your account.</p>'
-                : status === 'rejected'
-                ? '<p>Unfortunately, your refund request was not approved. Please contact support if you have questions.</p>'
-                : '<p>Your refund is being processed.</p>'
+              status === 'posted' || status === 'completed'
+                ? `<div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 20px; margin: 30px 0;">
+              <h4 style="color: #1e40af; font-size: 16px; margin: 0 0 10px 0;">✓ Funds Credited</h4>
+              <p style="color: #1e40af; font-size: 14px; line-height: 1.6; margin: 0;">
+                The refund amount of $${amount.toFixed(
+                  2
+                )} has been successfully credited to your checking account. The funds should be available immediately for your use.
+              </p>
+            </div>`
+                : status === 'cancelled' || status === 'failed'
+                ? `<div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 20px; margin: 30px 0;">
+              <h4 style="color: #991b1b; font-size: 16px; margin: 0 0 10px 0;">⚠️ Action May Be Required</h4>
+              <p style="color: #991b1b; font-size: 14px; line-height: 1.6; margin: 0;">
+                If you believe this refund should have been approved, or if you have questions about why it was not processed, please contact our customer support team for assistance.
+              </p>
+            </div>`
+                : `<div style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 6px; padding: 20px; margin: 30px 0;">
+              <h4 style="color: #92400e; font-size: 16px; margin: 0 0 10px 0;">⏱️ Processing in Progress</h4>
+              <p style="color: #78350f; font-size: 14px; line-height: 1.6; margin: 0;">
+                Your refund is currently being processed. You will receive another email notification once the refund is completed and the funds are available in your account.
+              </p>
+            </div>`
             }
+            
+            <p style="color: #4b5563; font-size: 15px; margin: 20px 0 0 0;">
+              Thank you for your patience,<br>
+              <strong style="color: #1f2937;">Fortiz Bank Refunds Team</strong>
+            </p>
           </div>
+          
+          ${getEmailFooter()}
         </div>
       </body>
       </html>
@@ -555,38 +1124,85 @@ export const emailTemplates = {
     reason: string,
     refundId: string
   ) => ({
-    subject: `🔔 New Refund Request from ${userName}`,
+    subject: `[Admin Alert] New Refund Request - ${userName} ($${amount.toFixed(
+      2
+    )})`,
     html: `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: #1f2937; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
-          .button { display: inline-block; padding: 12px 24px; background: #6366f1; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0; }
-          .detail-box { background: white; border: 1px solid #e5e7eb; padding: 15px; margin: 20px 0; border-radius: 8px; }
-        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
       </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>🔔 New Refund Request</h1>
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          <div style="background: linear-gradient(135deg, #1f2937 0%, #374151 100%); padding: 30px; text-align: center;">
+            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">
+              🔔 ADMIN NOTIFICATION
+            </h1>
+            <p style="margin: 8px 0 0 0; color: #e5e7eb; font-size: 14px;">
+              Fortiz Bank - Refunds Management
+            </p>
           </div>
-          <div class="content">
-            <h2>Admin Alert</h2>
-            <p>A new refund request requires your attention.</p>
-            <div class="detail-box">
-              <p><strong>User:</strong> ${userName} (${userEmail})</p>
-              <p><strong>Amount:</strong> $${amount.toFixed(2)}</p>
-              <p><strong>Reason:</strong> ${reason}</p>
-              <p><strong>Reference:</strong> ${refundId}</p>
+          
+          <div style="padding: 30px; background: #fefce8; border-left: 4px solid #eab308;">
+            <h2 style="color: #713f12; font-size: 20px; margin: 0 0 10px 0;">⚠️ Action Required: New Refund Request</h2>
+            <p style="color: #854d0e; font-size: 14px; margin: 0;">
+              A customer has submitted a new refund request that requires admin review and approval.
+            </p>
+          </div>
+          
+          <div style="padding: 30px;">
+            <h3 style="color: #1f2937; font-size: 18px; margin: 0 0 15px 0;">Request Details</h3>
+            
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 10px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Customer Name</td>
+                  <td style="padding: 10px 0; text-align: right; color: #1f2937; font-weight: 600;">${userName}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 10px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Customer Email</td>
+                  <td style="padding: 10px 0; text-align: right; color: #1f2937; font-family: monospace; font-size: 13px;">${userEmail}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 10px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Refund Amount</td>
+                  <td style="padding: 10px 0; text-align: right; color: #1f2937; font-weight: 700; font-size: 18px;">$${amount.toFixed(
+                    2
+                  )}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 10px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Reason</td>
+                  <td style="padding: 10px 0; text-align: right; color: #1f2937; text-transform: capitalize;">${reason.replace(
+                    '_',
+                    ' '
+                  )}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Reference ID</td>
+                  <td style="padding: 10px 0; text-align: right; color: #1f2937; font-family: monospace; font-size: 12px;">${refundId}</td>
+                </tr>
+              </table>
             </div>
-            <a href="${
-              process.env.NEXT_PUBLIC_APP_URL
-            }/admin/refunds" class="button">Review Refund</a>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="https://www.fortizb.com/admin/refunds" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #1f2937 0%, #374151 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">Review Refund Request</a>
+            </div>
+            
+            <div style="background: #f3f4f6; padding: 15px; border-radius: 6px; margin-top: 20px;">
+              <p style="color: #6b7280; font-size: 13px; margin: 0; line-height: 1.5;">
+                <strong style="color: #1f2937;">Admin Actions:</strong> Log in to the admin panel to review the refund request, verify the customer's information, and approve or reject the refund accordingly.
+              </p>
+            </div>
+          </div>
+          
+          <div style="background: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+            <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+              This is an automated admin notification from Fortiz Bank Refunds System.
+            </p>
+            <p style="color: #9ca3af; font-size: 12px; margin: 5px 0 0 0;">
+              &copy; ${new Date().getFullYear()} Fortiz Bank. All rights reserved.
+            </p>
           </div>
         </div>
       </body>
@@ -596,79 +1212,114 @@ export const emailTemplates = {
 
   // 11. Refund Approved (User Notification)
   refundApproved: (userName: string, amount: number, refundId: string) => ({
-    subject: `✅ Refund Approved - $${amount.toFixed(2)}`,
+    subject: `Refund Approved - $${amount.toFixed(2)} Being Processed`,
     html: `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: #000; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #fff; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb; }
-          .info-box { background: #f9fafb; border-left: 4px solid #000; padding: 20px; margin: 20px 0; border-radius: 8px; }
-          .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
-          .detail-row:last-child { border-bottom: none; }
-          .button { display: inline-block; padding: 12px 24px; background: #000; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0; }
-          .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #6b7280; }
-        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
       </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>✅ Refund Approved</h1>
-            <p style="margin: 10px 0 0 0; opacity: 0.9;">Your refund has been approved</p>
-          </div>
-          <div class="content">
-            <h2>Hi ${userName},</h2>
-            <p>Great news! Your refund has been approved and is ready to be transferred to your checking account.</p>
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          ${getEmailHeader()}
+          
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #1f2937; font-size: 24px; margin: 0 0 20px 0;">Dear ${userName},</h2>
             
-            <div class="info-box">
-              <h3 style="margin-top: 0; color: #000;">Refund Details</h3>
-              <div class="detail-row">
-                <span><strong>Amount:</strong></span>
-                <span style="font-size: 18px; font-weight: bold; color: #000;">$${amount.toFixed(
-                  2
-                )}</span>
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+              Excellent news! We are pleased to inform you that your refund request has been reviewed and approved by our team at Fortiz Bank. Your refund of <strong>$${amount.toFixed(
+                2
+              )}</strong> is now being processed and will be transferred to your checking account.
+            </p>
+            
+            <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 20px; margin: 25px 0; border-radius: 6px;">
+              <h3 style="color: #065f46; font-size: 18px; margin: 0 0 10px 0;">✓ Refund Approved</h3>
+              <p style="color: #047857; font-size: 15px; margin: 5px 0;">
+                Your refund has been approved and will be credited to your checking account within 1-3 business days.
+              </p>
+            </div>
+            
+            <h3 style="color: #1f2937; font-size: 20px; margin: 30px 0 15px 0;">Refund Details</h3>
+            
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">Refund Amount</td>
+                  <td style="padding: 12px 0; text-align: right; color: #1f2937; font-weight: 600; font-size: 18px;">$${amount.toFixed(
+                    2
+                  )}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">Status</td>
+                  <td style="padding: 12px 0; text-align: right;"><span style="display: inline-block; background: #ecfdf5; color: #065f46; padding: 6px 12px; border-radius: 12px; font-size: 13px; font-weight: 600;">APPROVED</span></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">Reference ID</td>
+                  <td style="padding: 12px 0; text-align: right; color: #1f2937; font-weight: 600; font-family: monospace; font-size: 12px;">${refundId}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">Approval Date</td>
+                  <td style="padding: 12px 0; text-align: right; color: #1f2937; font-weight: 600;">${new Date().toLocaleString(
+                    'en-US',
+                    { month: 'long', day: 'numeric', year: 'numeric' }
+                  )}</td>
+                </tr>
+              </table>
+            </div>
+            
+            <h3 style="color: #1f2937; font-size: 20px; margin: 30px 0 15px 0;">What Happens Next?</h3>
+            
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <div style="display: table; width: 100%; margin-bottom: 15px;">
+                <div style="display: table-cell; width: 40px; vertical-align: top;">
+                  <div style="width: 32px; height: 32px; background: #10b981; color: white; border-radius: 50%; text-align: center; line-height: 32px; font-weight: bold;">1</div>
+                </div>
+                <div style="display: table-cell; vertical-align: top; padding-left: 15px;">
+                  <h4 style="color: #1f2937; font-size: 16px; margin: 0 0 5px 0;">Transfer Initiated</h4>
+                  <p style="color: #6b7280; font-size: 14px; margin: 0;">Your refund is now being processed and will be transferred to your checking account.</p>
+                </div>
               </div>
-              <div class="detail-row">
-                <span><strong>Reference ID:</strong></span>
-                <span style="font-family: monospace;">${refundId}</span>
+              
+              <div style="display: table; width: 100%; margin-bottom: 15px;">
+                <div style="display: table-cell; width: 40px; vertical-align: top;">
+                  <div style="width: 32px; height: 32px; background: #10b981; color: white; border-radius: 50%; text-align: center; line-height: 32px; font-weight: bold;">2</div>
+                </div>
+                <div style="display: table-cell; vertical-align: top; padding-left: 15px;">
+                  <h4 style="color: #1f2937; font-size: 16px; margin: 0 0 5px 0;">Processing Time</h4>
+                  <p style="color: #6b7280; font-size: 14px; margin: 0;">The refund will typically be credited to your account within 1-3 business days.</p>
+                </div>
               </div>
-              <div class="detail-row">
-                <span><strong>Status:</strong></span>
-                <span style="color: #059669; font-weight: bold;">✅ Approved</span>
-              </div>
-              <div class="detail-row">
-                <span><strong>Date Approved:</strong></span>
-                <span>${new Date().toLocaleDateString()}</span>
+              
+              <div style="display: table; width: 100%;">
+                <div style="display: table-cell; width: 40px; vertical-align: top;">
+                  <div style="width: 32px; height: 32px; background: #10b981; color: white; border-radius: 50%; text-align: center; line-height: 32px; font-weight: bold;">3</div>
+                </div>
+                <div style="display: table-cell; vertical-align: top; padding-left: 15px;">
+                  <h4 style="color: #1f2937; font-size: 16px; margin: 0 0 5px 0;">Completion Notification</h4>
+                  <p style="color: #6b7280; font-size: 14px; margin: 0;">You'll receive a final confirmation email once the funds are successfully credited to your account.</p>
+                </div>
               </div>
             </div>
-
-            <div style="background: #f9fafb; border-left: 4px solid #374151; padding: 15px; margin: 20px 0; border-radius: 8px;">
-              <p style="margin: 0; color: #374151;"><strong>What happens next?</strong></p>
-              <ul style="margin: 10px 0 0 0; color: #374151;">
-                <li>Your refund will be transferred to your checking account</li>
-                <li>You'll receive another email once the transfer is completed</li>
-                <li>The transfer typically takes 1-3 business days</li>
-                <li>You can track the status in your dashboard</li>
-              </ul>
+            
+            <div style="text-align: center; margin: 35px 0;">
+              <a href="https://www.fortizb.com/dashboard/refunds" style="${getButtonStyle()}">Track Refund Status</a>
             </div>
-
-            <p>You can view your refunds and account balance in your dashboard.</p>
             
-            <a href="${
-              process.env.NEXT_PUBLIC_APP_URL
-            }/dashboard/refunds" class="button">View My Refunds</a>
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 20px; margin: 30px 0;">
+              <h4 style="color: #1e40af; font-size: 16px; margin: 0 0 10px 0;">📋 Important Information</h4>
+              <p style="color: #1e40af; font-size: 14px; line-height: 1.6; margin: 0;">
+                You can track the status of this refund in your dashboard at any time. The funds will appear in your checking account balance once the transfer is completed. If you have any questions, please contact our support team.
+              </p>
+            </div>
             
-            <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
-              If you have any questions about this refund, please contact our support team.
+            <p style="color: #4b5563; font-size: 15px; margin: 20px 0 0 0;">
+              Thank you for your patience,<br>
+              <strong style="color: #1f2937;">Fortiz Bank Refunds Team</strong>
             </p>
           </div>
-          <div class="footer">
-            <p>&copy; 2025 Fortiz Bank. All rights reserved.</p>
-          </div>
+          
+          ${getEmailFooter()}
         </div>
       </body>
       </html>
@@ -714,50 +1365,64 @@ export const emailTemplates = {
               <p style="margin: 0; color: #374151;"><strong>⚠️ Action Required:</strong> Please review this KYC submission within 24-48 hours.</p>
             </div>
 
-            <div class="detail-box">
-              <h3 style="margin-top: 0; color: #000;">Submission Details</h3>
-              <div style="display: grid; gap: 10px;">
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
-                  <span><strong>User Name:</strong></span>
-                  <span>${userName}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
-                  <span><strong>Email:</strong></span>
-                  <span>${userEmail}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
-                  <span><strong>ID Type:</strong></span>
-                  <span style="text-transform: uppercase;">${idType}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
-                  <span><strong>Phone:</strong></span>
-                  <span>${phoneNumber}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
-                  <span><strong>Address:</strong></span>
-                  <span>${address}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; padding: 8px 0;">
-                  <span><strong>Submission ID:</strong></span>
-                  <span style="font-family: monospace;">${submissionId}</span>
-                </div>
-              </div>
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 10px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Customer Name</td>
+                  <td style="padding: 10px 0; text-align: right; color: #1f2937; font-weight: 600;">${userName}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 10px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Customer Email</td>
+                  <td style="padding: 10px 0; text-align: right; color: #1f2937; font-family: monospace; font-size: 13px;">${userEmail}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 10px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Phone Number</td>
+                  <td style="padding: 10px 0; text-align: right; color: #1f2937;">${phoneNumber}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 10px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Address</td>
+                  <td style="padding: 10px 0; text-align: right; color: #1f2937;">${address}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 10px 0; color: #6b7280; font-size: 14px; font-weight: 600;">ID Type</td>
+                  <td style="padding: 10px 0; text-align: right; color: #1f2937; text-transform: capitalize;">${idType}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 10px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Submission ID</td>
+                  <td style="padding: 10px 0; text-align: right; color: #1f2937; font-family: monospace; font-size: 12px;">${submissionId}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Submitted On</td>
+                  <td style="padding: 10px 0; text-align: right; color: #1f2937;">${new Date().toLocaleString(
+                    'en-US',
+                    {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true,
+                    }
+                  )}</td>
+                </tr>
+              </table>
             </div>
-
-            <div style="background: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 15px; margin: 20px 0; border-radius: 8px;">
-              <p style="margin: 0; color: #0c4a6e;"><strong>Next Steps:</strong></p>
-              <ul style="margin: 10px 0 0 0; color: #0c4a6e;">
-                <li>Review the submitted documents and information</li>
-                <li>Verify the identity documents are clear and valid</li>
-                <li>Check that the address matches the proof of address</li>
-                <li>Approve or reject the submission</li>
-              </ul>
-            </div>
-
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/kyc" class="button">Review KYC Submission</a>
             
-            <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
-              This is an automated notification. Please review the submission promptly to ensure good user experience.
+            <a href="https://www.fortizb.com/admin/kyc" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #1f2937 0%, #374151 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin: 30px auto; display: block; text-align: center; max-width: 250px;">Review KYC Documents</a>
+            
+            <div style="background: #f3f4f6; padding: 15px; border-radius: 6px; margin-top: 20px;">
+              <p style="color: #6b7280; font-size: 13px; margin: 0 0 8px 0; line-height: 1.5;">
+                <strong style="color: #1f2937;">Admin Actions:</strong> Log in to review documents and approve/reject.
+              </p>
+            </div>
+          </div>
+          
+          <div style="background: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+            <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+              Automated admin notification from Fortiz Bank Compliance System.
+            </p>
+            <p style="color: #9ca3af; font-size: 12px; margin: 5px 0 0 0;">
+              &copy; ${new Date().getFullYear()} Fortiz Bank. All rights reserved.
             </p>
           </div>
         </div>
