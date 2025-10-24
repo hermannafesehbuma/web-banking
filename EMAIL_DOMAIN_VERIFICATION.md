@@ -24,7 +24,7 @@ NEXT_PUBLIC_FROM_EMAIL=Fortiz Bank <contact@fortizb.com>
 
 ---
 
-## 📨 **All Email Types Using Your Domain (12 Templates)**
+## 📨 **All Email Types Using Your Domain (15 Templates)**
 
 ### **User-Facing Emails:**
 1. ✅ **Welcome Email** - New user signups
@@ -86,14 +86,15 @@ NEXT_PUBLIC_FROM_EMAIL=Fortiz Bank <contact@fortizb.com>
 NEXT_PUBLIC_APP_URL=https://www.fortizb.com
 
 # Resend API Key
-NEXT_PUBLIC_RESEND_API_KEY=re_gGhte8ok_M54AR2g4GNSoiDFNvyCb1NK4
+NEXT_PUBLIC_RESEND_API_KEY=your_resend_api_key_here
 
 # Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL=https://xfwdlmutskuztuqrsmiw.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+NEXT_PUBLIC_SERVICE_ROLE_KEY=your_service_role_key_here
 
 # Google Maps API Key
-NEXT_PUBLIC_GOOGLE_MAPS_KEY=AIzaSyCd6qy...
+NEXT_PUBLIC_GOOGLE_MAPS_KEY=your_google_maps_key_here
 ```
 
 ---
@@ -163,5 +164,5 @@ npm run dev
 ---
 
 **Last Updated:** $(date)
-**Configuration File:** `/Users/joseph/Desktop/web-banking/.env`
+**Configuration Status:** All emails using contact@fortizb.com
 
