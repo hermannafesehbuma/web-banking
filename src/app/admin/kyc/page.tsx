@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/SupbaseClient';
+import { supabase } from '@/lib/supbaseClient';
 import {
   Card,
   CardContent,
@@ -185,8 +185,8 @@ export default function AdminKycPage() {
     } catch (error) {
       console.error('❌ CRITICAL ERROR in manual account creation:', error);
       console.error('❌ Error details:', {
-        message: error.message,
-        stack: error.stack,
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
         userId: userId,
       });
     }

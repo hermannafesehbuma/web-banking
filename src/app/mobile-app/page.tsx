@@ -6,15 +6,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PageTransition, SlideUp } from '@/components/PageTransition';
-import { 
-  Smartphone, 
-  Apple, 
+import {
+  Smartphone,
+  Apple,
   Play,
   Bell,
   CheckCircle2,
   Zap,
   Shield,
-  CreditCard
+  CreditCard,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -46,7 +46,7 @@ export default function MobileAppPage() {
       } else {
         setNotifyError(data.error || 'Failed to submit request');
       }
-    } catch (err) {
+    } catch {
       setNotifyError('An unexpected error occurred');
     } finally {
       setNotifyLoading(false);
@@ -82,10 +82,14 @@ export default function MobileAppPage() {
                   <h3 className="font-semibold">Get notified at launch</h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Be the first to know when our mobile app is available. We'll
-                  send you a one-time email when it's ready to download.
+                  Be the first to know when our mobile app is available.
+                  We&apos;ll send you a one-time email when it&apos;s ready to
+                  download.
                 </p>
-                <form className="flex flex-col sm:flex-row gap-3" onSubmit={handleNotifySubmit}>
+                <form
+                  className="flex flex-col sm:flex-row gap-3"
+                  onSubmit={handleNotifySubmit}
+                >
                   <Input
                     type="email"
                     placeholder="your@email.com"
@@ -100,7 +104,7 @@ export default function MobileAppPage() {
                 </form>
                 {notifySuccess && (
                   <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md text-sm text-green-800 dark:text-green-200">
-                    ✓ Thank you! We'll notify you when the app launches.
+                    ✓ Thank you! We&apos;ll notify you when the app launches.
                   </div>
                 )}
                 {notifyError && (
@@ -208,8 +212,8 @@ export default function MobileAppPage() {
                   Meanwhile, use our web app
                 </h3>
                 <p className="text-muted-foreground mb-6">
-                  Access all your banking features from any browser while you wait
-                  for the mobile app.
+                  Access all your banking features from any browser while you
+                  wait for the mobile app.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <Link href="/auth/login">
@@ -227,4 +231,3 @@ export default function MobileAppPage() {
     </PageTransition>
   );
 }
-

@@ -56,7 +56,7 @@ export default function Home() {
       } else {
         setNewsletterError(data.error || 'Failed to subscribe');
       }
-    } catch (err) {
+    } catch {
       setNewsletterError('An unexpected error occurred');
     } finally {
       setNewsletterLoading(false);
@@ -614,7 +614,10 @@ export default function Home() {
               <p className="mt-2 text-muted-foreground">
                 Subscribe for product updates and money tips.
               </p>
-              <form className="mt-6 flex flex-col sm:flex-row gap-3" onSubmit={handleNewsletterSubmit}>
+              <form
+                className="mt-6 flex flex-col sm:flex-row gap-3"
+                onSubmit={handleNewsletterSubmit}
+              >
                 <Input
                   type="email"
                   placeholder="you@example.com"

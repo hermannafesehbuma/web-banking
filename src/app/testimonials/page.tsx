@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Star } from 'lucide-react';
-import { PageTransition, SlideUp, StaggerContainer, StaggerItem } from '@/components/PageTransition';
+import { PageTransition } from '@/components/PageTransition';
 
 const testimonials = [
   {
@@ -219,72 +219,75 @@ const testimonials = [
 export default function TestimonialsPage() {
   return (
     <PageTransition>
-    <div className="container mx-auto max-w-6xl py-12 px-4">
-      <div className="mb-12 text-center">
-        <h1 className="text-4xl font-bold tracking-tight mb-4">
-          What Our Customers Say
-        </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Join thousands of satisfied customers who trust Fortiz Bank for their
-          financial needs
-        </p>
-        <div className="mt-6 flex items-center justify-center gap-2">
-          <div className="flex">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <Star key={i} className="h-6 w-6 fill-amber-400 text-amber-400" />
-            ))}
+      <div className="container mx-auto max-w-6xl py-12 px-4">
+        <div className="mb-12 text-center">
+          <h1 className="text-4xl font-bold tracking-tight mb-4">
+            What Our Customers Say
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Join thousands of satisfied customers who trust Fortiz Bank for
+            their financial needs
+          </p>
+          <div className="mt-6 flex items-center justify-center gap-2">
+            <div className="flex">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Star
+                  key={i}
+                  className="h-6 w-6 fill-amber-400 text-amber-400"
+                />
+              ))}
+            </div>
+            <span className="text-sm font-medium">
+              5.0 out of 5 ({testimonials.length} reviews)
+            </span>
           </div>
-          <span className="text-sm font-medium">
-            5.0 out of 5 ({testimonials.length} reviews)
-          </span>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {testimonials.map((testimonial, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-1 mb-4">
-                {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className="h-4 w-4 fill-amber-400 text-amber-400"
-                  />
-                ))}
-              </div>
-              <p className="text-sm text-muted-foreground mb-4">
-                &quot;{testimonial.content}&quot;
-              </p>
-              <div className="mt-4 pt-4 border-t">
-                <p className="font-semibold text-sm">{testimonial.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {testimonial.role}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {testimonials.map((testimonial, index) => (
+            <Card key={index} className="hover:shadow-lg transition-shadow">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-1 mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className="h-4 w-4 fill-amber-400 text-amber-400"
+                    />
+                  ))}
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  &quot;{testimonial.content}&quot;
                 </p>
-              </div>
+                <div className="mt-4 pt-4 border-t">
+                  <p className="font-semibold text-sm">{testimonial.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {testimonial.role}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="mt-16 text-center">
+          <Card className="max-w-2xl mx-auto bg-primary/5 border-primary/20">
+            <CardContent className="pt-8 pb-8">
+              <h3 className="text-2xl font-bold mb-4">
+                Ready to Join Our Community?
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                Experience the banking excellence that our customers rave about
+              </p>
+              <a
+                href="/open-account"
+                className="inline-flex items-center justify-center rounded-md bg-primary px-8 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              >
+                Open Your Account Today
+              </a>
             </CardContent>
           </Card>
-        ))}
+        </div>
       </div>
-
-      <div className="mt-16 text-center">
-        <Card className="max-w-2xl mx-auto bg-primary/5 border-primary/20">
-          <CardContent className="pt-8 pb-8">
-            <h3 className="text-2xl font-bold mb-4">
-              Ready to Join Our Community?
-            </h3>
-            <p className="text-muted-foreground mb-6">
-              Experience the banking excellence that our customers rave about
-            </p>
-            <a
-              href="/open-account"
-              className="inline-flex items-center justify-center rounded-md bg-primary px-8 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-            >
-              Open Your Account Today
-            </a>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
     </PageTransition>
   );
 }

@@ -9,7 +9,12 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { PageTransition, SlideUp, StaggerContainer, StaggerItem } from '@/components/PageTransition';
+import {
+  PageTransition,
+  SlideUp,
+  StaggerContainer,
+  StaggerItem,
+} from '@/components/PageTransition';
 import {
   CreditCard,
   Shield,
@@ -31,21 +36,36 @@ export default function CardServicesPage() {
     {
       name: 'Debit Card',
       description: 'Instant access to your checking account',
-      features: ['No annual fee', 'ATM withdrawals', 'Contactless payments', 'Instant notifications'],
+      features: [
+        'No annual fee',
+        'ATM withdrawals',
+        'Contactless payments',
+        'Instant notifications',
+      ],
       icon: CreditCard,
       badge: 'Most Popular',
     },
     {
       name: 'Credit Card',
       description: 'Build credit with competitive rates',
-      features: ['Cashback rewards', 'No foreign fees', 'Purchase protection', 'Credit building'],
+      features: [
+        'Cashback rewards',
+        'No foreign fees',
+        'Purchase protection',
+        'Credit building',
+      ],
       icon: Sparkles,
       badge: 'Coming Soon',
     },
     {
       name: 'Virtual Card',
       description: 'Secure online shopping',
-      features: ['Instant issuance', 'One-time use option', 'Enhanced security', 'Spending controls'],
+      features: [
+        'Instant issuance',
+        'One-time use option',
+        'Enhanced security',
+        'Spending controls',
+      ],
       icon: Smartphone,
       badge: 'Available',
     },
@@ -55,32 +75,38 @@ export default function CardServicesPage() {
     {
       icon: Shield,
       title: 'Advanced Security',
-      description: 'EMV chip technology, fraud monitoring, and instant card lock from your dashboard.',
+      description:
+        'EMV chip technology, fraud monitoring, and instant card lock from your dashboard.',
     },
     {
       icon: Globe,
       title: 'Global Acceptance',
-      description: 'Use your card anywhere Visa is accepted worldwide with competitive exchange rates.',
+      description:
+        'Use your card anywhere Visa is accepted worldwide with competitive exchange rates.',
     },
     {
       icon: Zap,
       title: 'Instant Notifications',
-      description: 'Get real-time alerts for every transaction, so you always know what\'s happening.',
+      description:
+        "Get real-time alerts for every transaction, so you always know what's happening.",
     },
     {
       icon: Lock,
       title: 'Spending Controls',
-      description: 'Set spending limits, freeze cards temporarily, and manage recurring payments.',
+      description:
+        'Set spending limits, freeze cards temporarily, and manage recurring payments.',
     },
     {
       icon: DollarSign,
       title: 'No Hidden Fees',
-      description: 'Transparent pricing with no monthly fees, maintenance charges, or surprise costs.',
+      description:
+        'Transparent pricing with no monthly fees, maintenance charges, or surprise costs.',
     },
     {
       icon: TrendingUp,
       title: 'Rewards & Cashback',
-      description: 'Earn rewards on everyday purchases and get cashback on eligible transactions.',
+      description:
+        'Earn rewards on everyday purchases and get cashback on eligible transactions.',
     },
   ];
 
@@ -106,9 +132,9 @@ export default function CardServicesPage() {
                   Cards designed for how you spend
                 </h1>
                 <p className="mt-4 text-muted-foreground text-base md:text-lg">
-                  From everyday debit cards to premium credit options, Fortiz Bank
-                  gives you secure, flexible payment solutions with powerful
-                  controls and zero hidden fees.
+                  From everyday debit cards to premium credit options, Fortiz
+                  Bank gives you secure, flexible payment solutions with
+                  powerful controls and zero hidden fees.
                 </p>
                 <div className="mt-6 flex flex-col sm:flex-row gap-3">
                   <Link href="/dashboard/cards">
@@ -133,8 +159,8 @@ export default function CardServicesPage() {
                 Choose the right card for you
               </h2>
               <p className="mt-2 text-muted-foreground">
-                Whether it's everyday spending or building credit, we have a card
-                that fits your needs.
+                Whether it&apos;s everyday spending or building credit, we have
+                a card that fits your needs.
               </p>
             </SlideUp>
             <StaggerContainer>
@@ -149,7 +175,9 @@ export default function CardServicesPage() {
                           </div>
                           <Badge
                             variant={
-                              card.badge === 'Coming Soon' ? 'secondary' : 'default'
+                              card.badge === 'Coming Soon'
+                                ? 'secondary'
+                                : 'default'
                             }
                           >
                             {card.badge}
@@ -229,8 +257,8 @@ export default function CardServicesPage() {
                     More than just a card
                   </h2>
                   <p className="mt-4 text-muted-foreground">
-                    With Fortiz cards, you get peace of mind and complete control
-                    over your spending.
+                    With Fortiz cards, you get peace of mind and complete
+                    control over your spending.
                   </p>
                   <ul className="mt-6 space-y-3">
                     {benefits.map((benefit) => (
@@ -251,8 +279,8 @@ export default function CardServicesPage() {
                       Welcome Bonus
                     </h3>
                     <p className="text-muted-foreground mb-4">
-                      Get $50 cashback when you spend $500 in your first 3 months
-                      with a new Fortiz debit card.
+                      Get $50 cashback when you spend $500 in your first 3
+                      months with a new Fortiz debit card.
                     </p>
                     <p className="text-xs text-muted-foreground">
                       *Terms and conditions apply. New customers only.
@@ -274,11 +302,13 @@ export default function CardServicesPage() {
                     <AlertCircle className="h-6 w-6 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold mb-1">Your security matters</h3>
+                    <h3 className="font-semibold mb-1">
+                      Your security matters
+                    </h3>
                     <p className="text-sm text-muted-foreground">
-                      All Fortiz cards are protected by advanced fraud detection,
-                      zero liability protection, and 24/7 monitoring. Never share
-                      your card details, PIN, or CVV with anyone.
+                      All Fortiz cards are protected by advanced fraud
+                      detection, zero liability protection, and 24/7 monitoring.
+                      Never share your card details, PIN, or CVV with anyone.
                     </p>
                   </div>
                 </CardContent>
@@ -317,4 +347,3 @@ export default function CardServicesPage() {
     </PageTransition>
   );
 }
-

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/SupbaseClient';
+import { supabase } from '@/lib/supbaseClient';
 import {
   Card,
   CardContent,

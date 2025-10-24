@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/SupbaseClient';
+import { supabase } from '@/lib/supbaseClient';
 import {
   Card,
   CardContent,
@@ -60,8 +60,8 @@ export default function VerifyPendingPage() {
               proceed to upload identity documents for KYC review.
             </p>
             <p>
-              Didn't receive the email? Check your spam folder or click below to
-              resend.
+              Didn&apos;t receive the email? Check your spam folder or click
+              below to resend.
             </p>
             <div>
               <Button

@@ -149,18 +149,21 @@ export async function POST(request: NextRequest) {
       debitTransactionData
     );
 
-    const { data: debitData, error: debitError } = await supabase
+    const { data: debitData, error: debitTxnError } = await supabase
       .from('transactions')
       .insert(debitTransactionData);
 
-    if (debitError) {
-      console.error('❌ [API TRANSFERS] Debit transaction error:', debitError);
+    if (debitTxnError) {
+      console.error(
+        '❌ [API TRANSFERS] Debit transaction error:',
+        debitTxnError
+      );
       console.error(
         '❌ [API TRANSFERS] Error details:',
-        JSON.stringify(debitError, null, 2)
+        JSON.stringify(debitTxnError, null, 2)
       );
       throw new Error(
-        `Failed to create debit transaction: ${debitError.message}`
+        `Failed to create debit transaction: ${debitTxnError.message}`
       );
     }
 
@@ -191,21 +194,21 @@ export async function POST(request: NextRequest) {
       creditTransactionData
     );
 
-    const { data: creditData, error: creditError } = await supabase
+    const { data: creditData, error: creditTxnError } = await supabase
       .from('transactions')
       .insert(creditTransactionData);
 
-    if (creditError) {
+    if (creditTxnError) {
       console.error(
         '❌ [API TRANSFERS] Credit transaction error:',
-        creditError
+        creditTxnError
       );
       console.error(
         '❌ [API TRANSFERS] Error details:',
-        JSON.stringify(creditError, null, 2)
+        JSON.stringify(creditTxnError, null, 2)
       );
       throw new Error(
-        `Failed to create credit transaction: ${creditError.message}`
+        `Failed to create credit transaction: ${creditTxnError.message}`
       );
     }
 

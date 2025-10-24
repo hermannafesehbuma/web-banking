@@ -85,7 +85,7 @@ export default function ContactPage() {
       } else {
         setError(data.error || 'Failed to send message');
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred');
     } finally {
       setLoading(false);
@@ -94,131 +94,135 @@ export default function ContactPage() {
 
   return (
     <PageTransition>
-    <div className="mx-auto w-full max-w-6xl px-6 py-16 md:py-20">
-      <section>
-        <Badge className="mb-4">Support</Badge>
-        <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
-          We are here to help
-        </h1>
-        <p className="mt-4 text-muted-foreground max-w-prose">
-          Reach out anytime. Our support team is available around the clock.
-        </p>
-      </section>
+      <div className="mx-auto w-full max-w-6xl px-6 py-16 md:py-20">
+        <section>
+          <Badge className="mb-4">Support</Badge>
+          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
+            We are here to help
+          </h1>
+          <p className="mt-4 text-muted-foreground max-w-prose">
+            Reach out anytime. Our support team is available around the clock.
+          </p>
+        </section>
 
-      <section className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-base">Send us a message</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <form className="grid grid-cols-1 gap-4" onSubmit={handleSubmit}>
-              <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  placeholder="Your full name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="message">Message</Label>
-                <Textarea
-                  id="message"
-                  placeholder="How can we help?"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  required
-                />
-              </div>
-              {success && (
-                <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md text-sm text-green-800 dark:text-green-200">
-                  ✓ Your message has been sent successfully!
+        <section className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-base">Send us a message</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <form className="grid grid-cols-1 gap-4" onSubmit={handleSubmit}>
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    placeholder="Your full name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
                 </div>
-              )}
-              {error && (
-                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md text-sm text-red-800 dark:text-red-200">
-                  {error}
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
                 </div>
-              )}
-              <div className="pt-2">
-                <Button type="submit" className="w-full md:w-auto" disabled={loading}>
-                  {loading ? 'Sending...' : 'Submit'}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Phone className="h-5 w-5 text-primary" /> Phone
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0 text-sm">
-              US: (800) 123-4567
-              <br />
-              International: +1 (555) 987-6543
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Mail className="h-5 w-5 text-primary" /> Email
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0 text-sm">
-              support@fortizbank.com
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <MessageSquare className="h-5 w-5 text-primary" /> Live chat
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0 text-sm">
-              Chat with us 24/7 in the app or web dashboard.
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-primary" /> Branch locations
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0 text-sm">
-              <div className="rounded-md overflow-hidden border">
-                <GoogleMapsLoader apiKey={apiKey}>
-                  <BranchMap branches={branches} zoom={4} height="300px" />
-                </GoogleMapsLoader>
-              </div>
-              <div className="mt-3">
-                <Link href="/about/branches">
-                  <Button variant="outline" size="sm" className="w-full">
-                    View All Branches
+                <div className="grid gap-2">
+                  <Label htmlFor="message">Message</Label>
+                  <Textarea
+                    id="message"
+                    placeholder="How can we help?"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    required
+                  />
+                </div>
+                {success && (
+                  <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md text-sm text-green-800 dark:text-green-200">
+                    ✓ Your message has been sent successfully!
+                  </div>
+                )}
+                {error && (
+                  <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md text-sm text-red-800 dark:text-red-200">
+                    {error}
+                  </div>
+                )}
+                <div className="pt-2">
+                  <Button
+                    type="submit"
+                    className="w-full md:w-auto"
+                    disabled={loading}
+                  >
+                    {loading ? 'Sending...' : 'Submit'}
                   </Button>
-                </Link>
-              </div>
+                </div>
+              </form>
             </CardContent>
           </Card>
-        </div>
-      </section>
-    </div>
+
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Phone className="h-5 w-5 text-primary" /> Phone
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0 text-sm">
+                US: (800) 123-4567
+                <br />
+                International: +1 (555) 987-6543
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Mail className="h-5 w-5 text-primary" /> Email
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0 text-sm">
+                support@fortizbank.com
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-primary" /> Live chat
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0 text-sm">
+                Chat with us 24/7 in the app or web dashboard.
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-primary" /> Branch locations
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0 text-sm">
+                <div className="rounded-md overflow-hidden border">
+                  <GoogleMapsLoader apiKey={apiKey}>
+                    <BranchMap branches={branches} zoom={4} height="300px" />
+                  </GoogleMapsLoader>
+                </div>
+                <div className="mt-3">
+                  <Link href="/about/branches">
+                    <Button variant="outline" size="sm" className="w-full">
+                      View All Branches
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+      </div>
     </PageTransition>
   );
 }

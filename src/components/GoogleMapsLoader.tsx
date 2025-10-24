@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react';
 
+// Declare google as any to avoid TypeScript errors with Google Maps API
+declare const google: any;
+
 interface GoogleMapsLoaderProps {
   children: React.ReactNode;
   apiKey: string;
@@ -12,7 +15,7 @@ export function GoogleMapsLoader({ children, apiKey }: GoogleMapsLoaderProps) {
 
   useEffect(() => {
     // Check if Google Maps is already loaded
-    if (window.google && window.google.maps) {
+    if (typeof google !== 'undefined' && google.maps) {
       setLoaded(true);
       return;
     }

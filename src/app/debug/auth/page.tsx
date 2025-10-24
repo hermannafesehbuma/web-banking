@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/SupbaseClient';
+import { supabase } from '@/lib/supbaseClient';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -53,7 +53,7 @@ export default function DebugAuthPage() {
               <div>
                 <strong>Has User:</strong> {user ? '✅ Yes' : '❌ No'}
               </div>
-              {user && typeof user === 'object' && user !== null && (
+              {user ? (
                 <>
                   <div>
                     <strong>User ID:</strong> {(user as any).id}
@@ -66,7 +66,7 @@ export default function DebugAuthPage() {
                     {(user as any).email_confirmed_at ? '✅ Yes' : '❌ No'}
                   </div>
                 </>
-              )}
+              ) : null}
             </div>
           </CardContent>
         </Card>

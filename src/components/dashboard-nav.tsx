@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useTheme } from '@/components/theme-provider';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/lib/SupbaseClient';
+import { supabase } from '@/lib/supbaseClient';
 import { cn } from '@/lib/utils';
 
 export function DashboardNav() {

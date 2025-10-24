@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/SupbaseClient';
+import { supabase } from '@/lib/supbaseClient';
 import {
   Card,
   CardContent,
@@ -270,14 +270,15 @@ export default function KycPage() {
 
         console.log('KYC submitted successfully!', inserted);
 
+        // Fetch user data for email notifications
+        const { data: userData } = await supabase
+          .from('bank_users')
+          .select('email, full_name')
+          .eq('id', userId)
+          .single();
+
         // Send email notification to user
         try {
-          const { data: userData } = await supabase
-            .from('bank_users')
-            .select('email, full_name')
-            .eq('id', userId)
-            .single();
-
           if (userData) {
             await fetch('/api/emails/kyc-submitted', {
               method: 'POST',

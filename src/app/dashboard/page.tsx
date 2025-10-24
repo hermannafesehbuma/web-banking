@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/SupbaseClient';
+import { supabase } from '@/lib/supbaseClient';
 import {
   Card,
   CardContent,
@@ -733,10 +733,6 @@ export default function DashboardPage() {
                   {/* Pie Chart */}
                   <div>
                     <p className="text-sm font-medium mb-4">By Category</p>
-                    {console.log(
-                      '📊 Rendering pie chart with data:',
-                      spendingByCategory
-                    )}
                     {spendingByCategory.length > 0 ? (
                       <ResponsiveContainer width="100%" height={200}>
                         <PieChart>
@@ -802,10 +798,6 @@ export default function DashboardPage() {
                 <Separator className="my-6 h-px" />
                 <div>
                   <p className="text-sm font-medium mb-4">Income vs Expenses</p>
-                  {console.log(
-                    '📈 Rendering line chart with data:',
-                    monthlyTrend
-                  )}
                   {monthlyTrend.some(
                     (item) => item.income > 0 || item.expenses > 0
                   ) ? (
@@ -853,7 +845,7 @@ export default function DashboardPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">
-                  This Month's Summary
+                  This Month&apos;s Summary
                 </CardTitle>
                 <CardDescription>
                   Income vs Expenses for{' '}

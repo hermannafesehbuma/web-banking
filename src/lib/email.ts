@@ -9,13 +9,15 @@ export interface EmailOptions {
   to: string;
   subject: string;
   html: string;
+  replyTo?: string;
 }
 
-export async function sendEmail({ to, subject, html }: EmailOptions) {
+export async function sendEmail({ to, subject, html, replyTo }: EmailOptions) {
   console.log('📧 Starting email send process...');
   console.log('📧 FROM_EMAIL:', FROM_EMAIL);
   console.log('📧 TO:', to);
   console.log('📧 SUBJECT:', subject);
+  console.log('📧 REPLY_TO:', replyTo);
   console.log(
     '📧 RESEND_API_KEY exists:',
     !!process.env.NEXT_PUBLIC_RESEND_API_KEY
@@ -28,6 +30,7 @@ export async function sendEmail({ to, subject, html }: EmailOptions) {
       to: [to],
       subject,
       html,
+      ...(replyTo && { reply_to: replyTo }),
     });
 
     if (error) {

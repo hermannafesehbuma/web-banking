@@ -2,6 +2,9 @@
 
 import { useEffect, useRef } from 'react';
 
+// Declare google as any to avoid TypeScript errors with Google Maps API
+declare const google: any;
+
 interface Branch {
   id: string;
   name: string;
@@ -26,10 +29,10 @@ export function BranchMap({
   height = '600px',
 }: BranchMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const googleMapRef = useRef<google.maps.Map | null>(null);
+  const googleMapRef = useRef<any>(null);
 
   useEffect(() => {
-    if (!mapRef.current || !window.google) return;
+    if (!mapRef.current || !google) return;
 
     // Initialize map
     const map = new google.maps.Map(mapRef.current, {
@@ -70,7 +73,7 @@ export function BranchMap({
       });
 
       // Extend bounds to include this marker
-      bounds.extend(marker.getPosition() as google.maps.LatLng);
+      bounds.extend(marker.getPosition());
 
       // Info window
       const infoWindow = new google.maps.InfoWindow({
