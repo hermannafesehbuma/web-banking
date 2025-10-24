@@ -96,6 +96,54 @@ type Statement = {
   file_type: string;
 };
 
+// Generate monthly trend data from transactions
+function generateMonthlyTrendData(transactions: Transaction[]): MonthlyData[] {
+  const monthlyData: { [key: string]: { income: number; expenses: number } } =
+    {};
+
+  // Get last 6 months
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    const date = new Date();
+    date.setMonth(date.getMonth() - i);
+    months.push(date);
+  }
+
+  // Initialize monthly data
+  months.forEach((month) => {
+    const key = month.toISOString().slice(0, 7); // YYYY-MM format
+    monthlyData[key] = { income: 0, expenses: 0 };
+  });
+
+  // Process transactions
+  transactions.forEach((transaction) => {
+    const transactionDate = new Date(transaction.created_at);
+    const monthKey = transactionDate.toISOString().slice(0, 7);
+
+    if (monthlyData[monthKey]) {
+      if (transaction.direction === 'credit') {
+        monthlyData[monthKey].income += transaction.amount;
+      } else if (transaction.direction === 'debit') {
+        monthlyData[monthKey].expenses += transaction.amount;
+      }
+    }
+  });
+
+  // Convert to array format
+  return months.map((month) => {
+    const key = month.toISOString().slice(0, 7);
+    const data = monthlyData[key] || { income: 0, expenses: 0 };
+    return {
+      month: month.toLocaleDateString('en-US', {
+        month: 'short',
+        year: 'numeric',
+      }),
+      income: Math.round(data.income * 100) / 100,
+      expenses: Math.round(data.expenses * 100) / 100,
+    };
+  });
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const { toast } = useToast();
@@ -282,9 +330,13 @@ export default function DashboardPage() {
         setSavingsGoal(dashboardData.goal);
         setStatements(dashboardData.statements || []);
 
-        if (dashboardData.summaries && dashboardData.summaries.length > 0) {
-          setMonthlyTrend(dashboardData.summaries);
-        }
+        // Generate monthly trend data from transactions
+        console.log('📊 Generating monthly trend data...');
+        const monthlyTrendData = generateMonthlyTrendData(transactions);
+        console.log('📊 Monthly trend data:', monthlyTrendData);
+
+        // Use real data only - no sample data
+        setMonthlyTrend(monthlyTrendData);
 
         // Fetch income/expense data
         console.log('🔄 Calling API /api/dashboard/income-expense');
@@ -300,10 +352,24 @@ export default function DashboardPage() {
         if (incomeExpenseResponse.ok) {
           const incomeExpenseData = await incomeExpenseResponse.json();
           console.log('💰 INCOME/EXPENSE DATA:', incomeExpenseData);
+          console.log(
+            '💰 EXPENSE CATEGORIES:',
+            incomeExpenseData.expenseCategories
+          );
+
+          // Use real data only - no sample data
           setSpendingByCategory(incomeExpenseData.expenseCategories || []);
+
           setTotalIncome(incomeExpenseData.totalIncome || 0);
           setTotalExpenses(incomeExpenseData.totalExpenses || 0);
           setNetIncome(incomeExpenseData.netIncome || 0);
+        } else {
+          console.error(
+            '❌ Failed to fetch income/expense data:',
+            incomeExpenseResponse.status
+          );
+          // No sample data - keep empty arrays
+          setSpendingByCategory([]);
         }
 
         // Fetch pending refunds (not cancelled, failed, or completed)
@@ -667,46 +733,68 @@ export default function DashboardPage() {
                   {/* Pie Chart */}
                   <div>
                     <p className="text-sm font-medium mb-4">By Category</p>
-                    <ResponsiveContainer width="100%" height={200}>
-                      <PieChart>
-                        <Pie
-                          data={spendingByCategory}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={50}
-                          outerRadius={80}
-                          paddingAngle={2}
-                          dataKey="value"
-                        >
-                          {spendingByCategory.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
+                    {console.log(
+                      '📊 Rendering pie chart with data:',
+                      spendingByCategory
+                    )}
+                    {spendingByCategory.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={200}>
+                        <PieChart>
+                          <Pie
+                            data={spendingByCategory}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={50}
+                            outerRadius={80}
+                            paddingAngle={2}
+                            dataKey="value"
+                          >
+                            {spendingByCategory.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="flex items-center justify-center h-[200px] text-muted-foreground">
+                        <div className="text-center">
+                          <p className="text-sm">No expense data</p>
+                          <p className="text-xs">
+                            Start spending to see categories
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Category List */}
                   <div>
                     <p className="text-sm font-medium mb-4">Top Categories</p>
-                    <div className="space-y-3">
-                      {spendingByCategory.map((cat) => (
-                        <div
-                          key={cat.name}
-                          className="flex items-center justify-between text-sm"
-                        >
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="h-3 w-3 rounded-full"
-                              style={{ backgroundColor: cat.color }}
-                            />
-                            <span>{cat.name}</span>
+                    {spendingByCategory.length > 0 ? (
+                      <div className="space-y-3">
+                        {spendingByCategory.map((cat) => (
+                          <div
+                            key={cat.name}
+                            className="flex items-center justify-between text-sm"
+                          >
+                            <div className="flex items-center gap-2">
+                              <div
+                                className="h-3 w-3 rounded-full"
+                                style={{ backgroundColor: cat.color }}
+                              />
+                              <span>{cat.name}</span>
+                            </div>
+                            <span className="font-medium">${cat.value}</span>
                           </div>
-                          <span className="font-medium">${cat.value}</span>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <p className="text-sm">No categories</p>
+                        <p className="text-xs">Expenses will appear here</p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -714,32 +802,49 @@ export default function DashboardPage() {
                 <Separator className="my-6 h-px" />
                 <div>
                   <p className="text-sm font-medium mb-4">Income vs Expenses</p>
-                  <ResponsiveContainer width="100%" height={200}>
-                    <LineChart data={monthlyTrend}>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        className="stroke-muted"
-                      />
-                      <XAxis dataKey="month" className="text-xs" />
-                      <YAxis className="text-xs" />
-                      <Tooltip />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="income"
-                        stroke="#00C49F"
-                        strokeWidth={2}
-                        name="Income"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="expenses"
-                        stroke="#FF8042"
-                        strokeWidth={2}
-                        name="Expenses"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                  {console.log(
+                    '📈 Rendering line chart with data:',
+                    monthlyTrend
+                  )}
+                  {monthlyTrend.some(
+                    (item) => item.income > 0 || item.expenses > 0
+                  ) ? (
+                    <ResponsiveContainer width="100%" height={200}>
+                      <LineChart data={monthlyTrend}>
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          className="stroke-muted"
+                        />
+                        <XAxis dataKey="month" className="text-xs" />
+                        <YAxis className="text-xs" />
+                        <Tooltip />
+                        <Legend />
+                        <Line
+                          type="monotone"
+                          dataKey="income"
+                          stroke="#00C49F"
+                          strokeWidth={2}
+                          name="Income"
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="expenses"
+                          stroke="#FF8042"
+                          strokeWidth={2}
+                          name="Expenses"
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex items-center justify-center h-[200px] text-muted-foreground">
+                      <div className="text-center">
+                        <p className="text-sm">No transaction data</p>
+                        <p className="text-xs">
+                          Income and expenses will appear here
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

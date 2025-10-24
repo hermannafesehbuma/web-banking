@@ -35,72 +35,57 @@ export async function GET(request: NextRequest) {
     console.log('API: User email:', user.email);
 
     // Fetch all data in parallel
-    const [
-      accountsRes,
-      transactionsRes,
-      summariesRes,
-      alertsRes,
-      goalsRes,
-      statementsRes,
-    ] = await Promise.all([
-      // Accounts
-      supabase
-        .from('accounts')
-        .select('id, account_number, account_type, balance')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: true }),
+    const [accountsRes, transactionsRes, alertsRes, goalsRes, statementsRes] =
+      await Promise.all([
+        // Accounts
+        supabase
+          .from('accounts')
+          .select('id, account_number, account_type, balance')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: true }),
 
-      // Recent Transactions
-      supabase
-        .from('transactions')
-        .select(
-          'id, amount, direction, transaction_type, description, created_at, status, reference, balance_after, metadata'
-        )
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(5),
+        // Recent Transactions
+        supabase
+          .from('transactions')
+          .select(
+            'id, amount, direction, transaction_type, description, created_at, status, reference, balance_after, metadata'
+          )
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(5),
 
-      // Monthly Summaries
-      supabase
-        .from('monthly_summaries')
-        .select('month, total_income, total_expenses')
-        .eq('user_id', user.id)
-        .order('month', { ascending: true })
-        .limit(4),
+        // Alerts
+        supabase
+          .from('alerts')
+          .select('id, type, title, message, severity')
+          .eq('user_id', user.id)
+          .eq('is_read', false)
+          .order('created_at', { ascending: false })
+          .limit(3),
 
-      // Alerts
-      supabase
-        .from('alerts')
-        .select('id, type, title, message, severity')
-        .eq('user_id', user.id)
-        .eq('is_read', false)
-        .order('created_at', { ascending: false })
-        .limit(3),
+        // Savings Goals
+        supabase
+          .from('savings_goals')
+          .select('id, goal_name, target_amount, current_amount, target_date')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single(),
 
-      // Savings Goals
-      supabase
-        .from('savings_goals')
-        .select('id, goal_name, target_amount, current_amount, target_date')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single(),
-
-      // Statements
-      supabase
-        .from('statements')
-        .select('id, statement_month, file_url, file_type')
-        .eq('user_id', user.id)
-        .order('statement_month', { ascending: false })
-        .limit(2),
-    ]);
+        // Statements
+        supabase
+          .from('statements')
+          .select('id, statement_month, file_url, file_type')
+          .eq('user_id', user.id)
+          .order('statement_month', { ascending: false })
+          .limit(2),
+      ]);
 
     // Log any errors
     if (accountsRes.error) console.log('Accounts error:', accountsRes.error);
     if (transactionsRes.error)
       console.log('Transactions error:', transactionsRes.error);
-    if (summariesRes.error) console.log('Summaries error:', summariesRes.error);
     if (alertsRes.error) console.log('Alerts error:', alertsRes.error);
     if (goalsRes.error && goalsRes.error.code !== 'PGRST116')
       console.log('Goals error:', goalsRes.error);
@@ -109,7 +94,6 @@ export async function GET(request: NextRequest) {
 
     const accounts = accountsRes.data ?? [];
     const transactions = transactionsRes.data ?? [];
-    const summaries = summariesRes.data ?? [];
     const alerts = alertsRes.data ?? [];
     const goal = goalsRes.data ?? null;
     const statements = statementsRes.data ?? [];
@@ -117,7 +101,6 @@ export async function GET(request: NextRequest) {
     console.log('API: Dashboard data fetched:', {
       accountsCount: accounts.length,
       transactionsCount: transactions.length,
-      summariesCount: summaries.length,
       alertsCount: alerts.length,
       hasGoal: !!goal,
       statementsCount: statements.length,
@@ -128,7 +111,6 @@ export async function GET(request: NextRequest) {
       'API: Transactions data:',
       JSON.stringify(transactions, null, 2)
     );
-    console.log('API: Summaries data:', JSON.stringify(summaries, null, 2));
     console.log('API: Alerts data:', JSON.stringify(alerts, null, 2));
     console.log('API: Goal data:', JSON.stringify(goal, null, 2));
     console.log('API: Statements data:', JSON.stringify(statements, null, 2));
@@ -136,7 +118,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       accounts,
       transactions,
-      summaries,
       alerts,
       goal,
       statements,

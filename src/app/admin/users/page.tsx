@@ -92,6 +92,8 @@ export default function AdminUsersPage() {
 
   const handleApproveKYC = async (userId: string, userName: string) => {
     try {
+      console.log('🎯 APPROVING KYC FOR USER:', userId, userName);
+
       // Get user email
       const { data: userData } = await supabase
         .from('bank_users')
@@ -99,19 +101,108 @@ export default function AdminUsersPage() {
         .eq('id', userId)
         .single();
 
+      console.log('📧 User email:', userData?.email);
+
+      // Update bank_users.kyc_status
+      console.log('🔄 Updating bank_users.kyc_status to approved...');
       const { error } = await supabase
         .from('bank_users')
         .update({ kyc_status: 'approved' })
         .eq('id', userId);
 
       if (error) {
-        console.error('Error approving KYC:', error);
+        console.error('❌ Error approving KYC in bank_users:', error);
         toast({
           title: 'Error',
           description: error.message || 'Failed to approve KYC.',
           variant: 'destructive',
         });
+        return;
+      }
+
+      console.log('✅ bank_users.kyc_status updated to approved');
+
+      // ALSO update kyc_submissions.status to approved
+      console.log('🔄 Updating kyc_submissions.status to approved...');
+      const { data: kycUpdate, error: kycError } = await supabase
+        .from('kyc_submissions')
+        .update({
+          status: 'approved',
+          reviewed_at: new Date().toISOString(),
+        })
+        .eq('user_id', userId)
+        .select();
+
+      if (kycError) {
+        console.error('❌ Error updating kyc_submissions:', kycError);
       } else {
+        console.log(
+          '✅ kyc_submissions.status updated to approved:',
+          kycUpdate
+        );
+      }
+
+      // Create checking and savings accounts for the user
+      console.log('🏦 Creating checking and savings accounts...');
+
+      // Check if accounts already exist
+      const { data: existingAccounts } = await supabase
+        .from('accounts')
+        .select('id, account_type')
+        .eq('user_id', userId);
+
+      console.log('📊 Existing accounts:', existingAccounts);
+
+      if (!existingAccounts || existingAccounts.length < 2) {
+        // Create checking account
+        const checkingNumber = Math.floor(Math.random() * 10000000000)
+          .toString()
+          .padStart(10, '0');
+        const { data: checkingAccount, error: checkingError } = await supabase
+          .from('accounts')
+          .insert({
+            user_id: userId,
+            account_type: 'checking',
+            account_number: checkingNumber,
+            balance: 0,
+          })
+          .select()
+          .single();
+
+        if (checkingError) {
+          console.error('❌ Error creating checking account:', checkingError);
+        } else {
+          console.log('✅ Checking account created:', checkingAccount);
+        }
+
+        // Create savings account
+        const savingsNumber = Math.floor(Math.random() * 10000000000)
+          .toString()
+          .padStart(10, '0');
+        const { data: savingsAccount, error: savingsError } = await supabase
+          .from('accounts')
+          .insert({
+            user_id: userId,
+            account_type: 'savings',
+            account_number: savingsNumber,
+            balance: 0,
+          })
+          .select()
+          .single();
+
+        if (savingsError) {
+          console.error('❌ Error creating savings account:', savingsError);
+        } else {
+          console.log('✅ Savings account created:', savingsAccount);
+        }
+
+        console.log('🎉 Account creation completed!');
+      } else {
+        console.log('✅ User already has accounts, skipping creation');
+      }
+
+      // Continue with the rest of the flow
+      {
         // Create alert for user
         await supabase.from('alerts').insert({
           user_id: userId,
