@@ -114,7 +114,15 @@ function LoginForm() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
+                  <a
+                    href="/auth/reset-password"
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Forgot password?
+                  </a>
+                </div>
                 <Input
                   id="password"
                   type="password"
