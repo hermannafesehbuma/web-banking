@@ -237,7 +237,7 @@ export default function SettingsPage() {
                     validatePhone(e.target.value);
                   }}
                   onBlur={(e) => validatePhone(e.target.value)}
-                  placeholder="+1 (555) 000-0000"
+                  placeholder="+1 (804) 973-0278"
                   aria-invalid={!!phoneError}
                   aria-describedby={phoneError ? 'phone-error' : undefined}
                 />

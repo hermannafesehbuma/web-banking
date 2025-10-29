@@ -100,7 +100,7 @@ API: Alert created for card request
 - ✅ 4-step process timeline
 - ✅ "Track Card Status" button → www.fortizb.com/dashboard/cards
 - ✅ Security reminder
-- ✅ Contact footer (contact@fortizb.com, 1-800-FORTIZ-B)
+- ✅ Contact footer (contact@fortizb.com, +1 (804) 973-0278)
 
 ## 🧪 **Test Again Now!**
 

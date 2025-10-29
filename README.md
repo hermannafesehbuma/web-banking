@@ -139,7 +139,7 @@ For questions or issues:
 
 - Visit the [Contact Page](/contact)
 - Email: support@fortizbank.com
-- Phone: 1-800-FORTIZ-1
+- Phone: +1 (804) 973-0278
 
 ---
 

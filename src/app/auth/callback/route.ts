@@ -61,6 +61,6 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Fallback redirect
-  return NextResponse.redirect(new URL('/dashboard', request.url));
+  // Fallback redirect - new users should go to KYC, not dashboard
+  return NextResponse.redirect(new URL('/kyc', request.url));
 }

@@ -137,7 +137,7 @@ export default function OpenAccountPage() {
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="+1 (555) 000-0000"
+                  placeholder="+1 (804) 973-0278"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                 />

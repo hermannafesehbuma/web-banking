@@ -118,7 +118,7 @@ All **12 email templates** in Fortiz Bank have been successfully redesigned with
 ✅ **Footer**: Complete contact information including:
 
 - Email: contact@fortizb.com
-- Phone: 1-800-FORTIZ-B (1-800-367-8492)
+- Phone: +1 (804) 973-0278
 - FDIC member notice
 - Copyright information
 

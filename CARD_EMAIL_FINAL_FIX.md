@@ -102,7 +102,7 @@ API: Alert created for card request
 - ✅ **Security Note** about sealed card delivery
 - ✅ **Professional Footer:**
   - Contact: contact@fortizb.com
-  - Phone: 1-800-FORTIZ-B
+  - Phone: +1 (804) 973-0278
   - FDIC Member notice
 
 ## 🧪 **Test It Right Now!**

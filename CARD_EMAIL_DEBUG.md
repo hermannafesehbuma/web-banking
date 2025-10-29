@@ -67,7 +67,7 @@ The `cardRequested` email template is **fully styled** and includes:
 4.  Card Delivery & Activation  
     ✅ **Track Card Status button** → `https://www.fortizb.com/dashboard/cards`  
     ✅ **Security note** about card delivery  
-    ✅ **Full contact footer** (contact@fortizb.com, 1-800-FORTIZ-B)
+    ✅ **Full contact footer** (contact@fortizb.com, +1 (804) 973-0278)
 
 ## 🧪 Testing Steps
 

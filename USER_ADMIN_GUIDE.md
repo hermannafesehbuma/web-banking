@@ -294,7 +294,7 @@ All emails are sent from: **contact@fortizb.com**
 **Need Help?**
 
 - Email: contact@fortizb.com
-- Phone: 1-800-FORTIZ-B (1-800-367-8492)
+- Phone: +1 (804) 973-0278
 - Visit any branch location
 
 ---

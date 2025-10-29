@@ -20,7 +20,7 @@ const branches = [
     address: '6310 San Vicente Blvd, Los Angeles, CA 90048, USA',
     lat: 34.0752,
     lng: -118.365,
-    phone: '(310) 555-0100',
+    phone: '+1 (804) 973-0278',
     hours: 'Mon-Fri: 9:00 AM - 5:00 PM',
   },
   {
@@ -29,7 +29,7 @@ const branches = [
     address: '1330 6th Ave, 23rd Floor, New York, NY 10019, USA',
     lat: 40.7614,
     lng: -73.9776,
-    phone: '(212) 555-0200',
+    phone: '+1 (804) 973-0278',
     hours: 'Mon-Fri: 9:00 AM - 5:00 PM',
   },
   {
@@ -38,7 +38,7 @@ const branches = [
     address: '220 W White St, Rock Hill, SC 29730, USA',
     lat: 34.9248,
     lng: -81.0251,
-    phone: '(803) 555-0300',
+    phone: '+1 (804) 973-0278',
     hours: 'Mon-Fri: 9:00 AM - 5:00 PM',
   },
   {
@@ -47,7 +47,7 @@ const branches = [
     address: '5388 Ronald Reagan Blvd, Johnstown, CO 80534, USA',
     lat: 40.3369,
     lng: -104.9142,
-    phone: '(970) 555-0400',
+    phone: '+1 (804) 973-0278',
     hours: 'Mon-Fri: 9:00 AM - 5:00 PM',
   },
 ];
@@ -174,9 +174,9 @@ export default function ContactPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0 text-sm">
-                US: (800) 123-4567
+                US: +1 (804) 973-0278
                 <br />
-                International: +1 (555) 987-6543
+                International: +1 (804) 973-0278
               </CardContent>
             </Card>
             <Card>
