@@ -159,14 +159,21 @@ export default function AdminRefundsPage() {
               .from('bank_users')
               .select('email, full_name')
               .eq('id', refund.user_id)
-              .single();
+              .maybeSingle();
 
             if (userError) {
               console.error(
                 '❌ [ADMIN REFUNDS] Error fetching user data for refund',
                 refund.id,
                 ':',
-                userError
+                typeof userError === 'object' && userError !== null && 'message' in userError ? userError.message : JSON.stringify(userError)
+              );
+            } else if (!userData) {
+              console.log(
+                '⚠️ [ADMIN REFUNDS] User not found for refund',
+                refund.id,
+                'user_id:',
+                refund.user_id
               );
             } else {
               console.log(
