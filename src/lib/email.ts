@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.NEXT_PUBLIC_RESEND_API_KEY);
+const resend = new Resend(process.env.resend_key);
 
 const FROM_EMAIL =
   process.env.NEXT_PUBLIC_FROM_EMAIL || 'Fortiz Bank <noreply@resend.dev>';
@@ -19,8 +19,8 @@ export async function sendEmail({ to, subject, html, replyTo }: EmailOptions) {
   console.log('📧 SUBJECT:', subject);
   console.log('📧 REPLY_TO:', replyTo);
   console.log(
-    '📧 RESEND_API_KEY exists:',
-    !!process.env.NEXT_PUBLIC_RESEND_API_KEY
+    '📧 resend_key exists:',
+    !!process.env.resend_key
   );
 
   try {
